@@ -73,4 +73,6 @@ Finally:
 * Click on "Save changes"
 
 ## Donating to the Devs :)
-XMR Address : `44krVcL6TPkANjpFwS2GWvg1kJhTrN7y9heVeQiDJ3rP8iGbCd5GeA4f3c2NKYHC1R4mCgnW7dsUUUae2m9GiNBGT4T8s2X`
+MSR Address: `5iKvFxieyiYfo5yLMwsrXqByn2fb1upm77MTpiyQNpxqjEJWzVrfpDCDpZCNZ48f9xYZM2mG5GrfzP5UCt6bkVwn1xhjERf` (cryptochangements)
+
+XMR Address : `44krVcL6TPkANjpFwS2GWvg1kJhTrN7y9heVeQiDJ3rP8iGbCd5GeA4f3c2NKYHC1R4mCgnW7dsUUUae2m9GiNBGT4T8s2X` (serhack)
