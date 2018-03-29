@@ -357,7 +357,7 @@ class Monero_Gateway extends WC_Payment_Gateway
             <!--Import Google Icon Font-->
             <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css?family=Montserrat:400,800' rel='stylesheet'>
-            <link href='http://cdn.monerointegrations.com/style.css' rel='stylesheet'>
+            <link href='/style.css' rel='stylesheet' type='text/css'>
             <!--Let browser know website is optimized for mobile-->
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
                 </head>
@@ -368,7 +368,7 @@ class Monero_Gateway extends WC_Payment_Gateway
                 <div class='container-xmr-payment'>
                 <!-- header -->
                 <div class='header-xmr-payment'>
-                <span class='logo-xmr'><img src='http://cdn.monerointegrations.com/logomonero.png' /></span>
+                
                 <span class='xmr-payment-text-header'><h2>MASARI PAYMENT</h2></span>
                 </div>
                 <!-- end header -->
@@ -393,7 +393,7 @@ class Monero_Gateway extends WC_Payment_Gateway
                 <!-- end content box -->
                 <!-- footer xmr payment -->
                 <div class='footer-xmr-payment'>
-                <a href='https://getmonero.org' target='_blank'>Help</a> | <a href='https://getmonero.org' target='_blank'>About Monero</a>
+                <a href='https://getmasari.org' target='_blank'>Help</a> | <a href='https://getmasari.org' target='_blank'>About Masari</a>
                 </div>
                 <!-- end footer xmr payment -->
                 </div>
@@ -438,7 +438,7 @@ class Monero_Gateway extends WC_Payment_Gateway
             <!--Import Google Icon Font-->
             <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
             <link href='https://fonts.googleapis.com/css?family=Montserrat:400,800' rel='stylesheet'>
-            <link href='http://127.0.0.1:8888/style.css' rel='stylesheet'>
+            <link href='/style.css' rel='stylesheet' type='text/css'>
             <!--Let browser know website is optimized for mobile-->
                 <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
                 </head>
