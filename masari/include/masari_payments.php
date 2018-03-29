@@ -3,6 +3,7 @@
 /* 
  * Main Gateway of Monero using a daemon online 
  * Authors: Serhack and cryptochangements
+ * Modified to work with Masari
  */
 
 
@@ -18,9 +19,9 @@ class Monero_Gateway extends WC_Payment_Gateway
     function __construct()
     {
         $this->id = "monero_gateway";
-        $this->method_title = __("Monero GateWay", 'monero_gateway');
-        $this->method_description = __("Monero Payment Gateway Plug-in for WooCommerce. You can find more information about this payment gateway on our website. You'll need a daemon online for your address.", 'monero_gateway');
-        $this->title = __("Monero Gateway", 'monero_gateway');
+        $this->method_title = __("Masari GateWay", 'monero_gateway');
+        $this->method_description = __("Masari Payment Gateway Plug-in for WooCommerce. You can find more information about this payment gateway on our website. You'll need a daemon online for your address.", 'monero_gateway');
+        $this->title = __("Masari Gateway", 'monero_gateway');
         $this->version = "2.0";
         //
         $this->icon = apply_filters('woocommerce_offline_icon', '');
@@ -31,7 +32,7 @@ class Monero_Gateway extends WC_Payment_Gateway
         $this->init_form_fields();
         $this->host = $this->get_option('daemon_host');
         $this->port = $this->get_option('daemon_port');
-        $this->address = $this->get_option('monero_address');
+        $this->address = $this->get_option('masari_address');
         $this->viewKey = $this->get_option('viewKey');
         $this->discount = $this->get_option('discount');
         $this->accept_zero_conf = $this->get_option('zero_conf');
@@ -92,13 +93,13 @@ class Monero_Gateway extends WC_Payment_Gateway
                 'title' => __('Title', 'monero_gateway'),
                 'type' => 'text',
                 'desc_tip' => __('Payment title the customer will see during the checkout process.', 'monero_gateway'),
-                'default' => __('Monero XMR Payment', 'monero_gateway')
+                'default' => __('Masari Currency', 'monero_gateway')
             ),
             'description' => array(
                 'title' => __('Description', 'monero_gateway'),
                 'type' => 'textarea',
                 'desc_tip' => __('Payment description the customer will see during the checkout process.', 'monero_gateway'),
-                'default' => __('Pay securely using XMR.', 'monero_gateway')
+                'default' => __('Pay securely using MSR.', 'monero_gateway')
 
             ),
             'use_viewKey' => array(
@@ -108,11 +109,11 @@ class Monero_Gateway extends WC_Payment_Gateway
                 'description' => __('Fill in the Address and ViewKey fields to verify transactions with your ViewKey', 'monero_gateway'),
                 'default' => 'no'
             ),
-            'monero_address' => array(
-                'title' => __('Monero Address', 'monero_gateway'),
+            'masari_address' => array(
+                'title' => __('Masari Address', 'monero_gateway'),
                 'label' => __('Useful for people that have not a daemon online'),
                 'type' => 'text',
-                'desc_tip' => __('Monero Wallet Address', 'monero_gateway')
+                'desc_tip' => __('Masari Wallet Address', 'monero_gateway')
             ),
             'viewKey' => array(
                 'title' => __('Secret ViewKey', 'monero_gateway'),
@@ -121,29 +122,29 @@ class Monero_Gateway extends WC_Payment_Gateway
                 'desc_tip' => __('Your secret ViewKey', 'monero_gateway')
             ),
             'use_rpc' => array(
-                'title' => __('Use monero-wallet-rpc', 'monero_gateway'),
-                'label' => __(' Verify transactions with the monero-wallet-rpc ', 'monero_gateway'),
+                'title' => __('Use masari-wallet-rpc', 'monero_gateway'),
+                'label' => __(' Verify transactions with the masari-wallet-rpc ', 'monero_gateway'),
                 'type' => 'checkbox',
                 'description' => __('This must be setup seperatly', 'monero_gateway'),
                 'default' => 'no'
             ),
             'daemon_host' => array(
-                'title' => __('Monero wallet rpc Host/ IP', 'monero_gateway'),
+                'title' => __('Masari wallet rpc Host/ IP', 'monero_gateway'),
                 'type' => 'text',
                 'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'monero_gateway'),
                 'default' => 'localhost',
             ),
             'daemon_port' => array(
-                'title' => __('Monero wallet rpc port', 'monero_gateway'),
+                'title' => __('Masari wallet rpc port', 'monero_gateway'),
                 'type' => 'text',
                 'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'monero_gateway'),
                 'default' => '18080',
             ),
             'discount' => array(
-                'title' => __('% discount for using XMR', 'monero_gateway'),
+                'title' => __('% discount for using MSR', 'monero_gateway'),
 
-                'desc_tip' => __('Provide a discount to your customers for making a private payment with XMR!', 'monero_gateway'),
-                'description' => __('Do you want to spread the word about Monero? Offer a small discount! Leave this empty if you do not wish to provide a discount', 'monero_gateway'),
+                'desc_tip' => __('Provide a discount to your customers for making a private payment with MSR!', 'monero_gateway'),
+                'description' => __('Do you want to spread the word about Masari? Offer a small discount! Leave this empty if you do not wish to provide a discount', 'monero_gateway'),
                 'type' => __('number'),
                 'default' => '5'
 
@@ -174,15 +175,15 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     public function add_my_currency($currencies)
     {
-        $currencies['XMR'] = __('Monero', 'woocommerce');
+        $currencies['MSR'] = __('Masari', 'woocommerce');
         return $currencies;
     }
 
     function add_my_currency_symbol($currency_symbol, $currency)
     {
         switch ($currency) {
-            case 'XMR':
-                $currency_symbol = 'XMR';
+            case 'MSR':
+                $currency_symbol = 'MSR';
                 break;
         }
         return $currency_symbol;
@@ -190,10 +191,10 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     public function admin_options()
     {
-        $this->log->add('Monero_gateway', '[SUCCESS] Monero Settings OK');
-        echo "<h1>Monero Payment Gateway</h1>";
+        $this->log->add('Monero_gateway', '[SUCCESS] Masari Settings OK');
+        echo "<h1>Masari Payment Gateway</h1>";
 
-        echo "<p>Welcome to Monero Extension for WooCommerce. Getting started: Make a connection with daemon <a href='https://reddit.com/u/serhack'>Contact Me</a>";
+        echo "<p>Welcome to Masari Extension for WooCommerce. Getting started: Make a connection with daemon";
         echo "<div style='border:1px solid #DDD;padding:5px 10px;font-weight:bold;color:#223079;background-color:#9ddff3;'>";
         
         if(!$this->non_rpc) // only try to get balance data if using wallet-rpc
@@ -203,14 +204,14 @@ class Monero_Gateway extends WC_Payment_Gateway
         echo "<table class='form-table'>";
         $this->generate_settings_html();
         echo "</table>";
-        echo "<h4>Learn more about using monero-wallet-rpc <a href=\"https://github.com/monero-integrations/monerowp/blob/master/README.md\">here</a> and viewkeys <a href=\"https://getmonero.org/resources/moneropedia/viewkey.html\">here</a> </h4>";
+        echo "<h4>Learn more about using masari-wallet-rpc <a href=\"https://github.com/masari-project/monerowp/blob/master/README.md\">here</a> and viewkeys <a href=\"https://getmonero.org/resources/moneropedia/viewkey.html\">here</a> </h4>";
     }
 
     public function getamountinfo()
     {
         $wallet_amount = $this->monero_daemon->getbalance();
         if (!isset($wallet_amount)) {
-            $this->log->add('Monero_gateway', '[ERROR] Can not connect to monero-wallet-rpc');
+            $this->log->add('Monero_gateway', '[ERROR] Can not connect to masari-wallet-rpc');
             echo "</br>Your balance is: Not Avaliable </br>";
             echo "Unlocked balance: Not Avaliable";
         }
@@ -250,7 +251,7 @@ class Monero_Gateway extends WC_Payment_Gateway
     public function validate_fields()
     {
         if ($this->check_monero() != TRUE) {
-            echo "<div class=\"error\"><p>Your Monero Address doesn't look valid. Have you checked it?</p></div>";
+            echo "<div class=\"error\"><p>Your Masari Address doesn't look valid. Have you checked it?</p></div>";
         }
         if(!$this->check_viewKey())
         {
@@ -269,7 +270,7 @@ class Monero_Gateway extends WC_Payment_Gateway
     public function check_monero()
     {
         $monero_address = $this->settings['monero_address'];
-        if (strlen($monero_address) == 95 && substr($monero_address, 1)) {
+        if (strlen($monero_address) == 95) {
             return true;
         }
         return false;
@@ -322,18 +323,18 @@ class Monero_Gateway extends WC_Payment_Gateway
             $amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
             $payment_id = $this->set_paymentid_cookie(32);
             $currency = $order->get_currency();
-            $amount_xmr2 = $this->changeto($amount, $currency, $payment_id);
+            $amount_xmr2 = $this->changeto( $amount, $payment_id);
             $address = $this->address;
             
             $order->update_meta_data( "Payment ID", $payment_id);
-            $order->update_meta_data( "Amount requested (XMR)", $amount_xmr2);
+            $order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
             $order->save();
             
             if (!isset($address)) {
                 // If there isn't address (merchant missed that field!), $address will be the Monero address for donating :)
                 $address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
             }
-            $uri = "monero:$address?tx_payment_id=$payment_id";
+            $uri = "masari:$address?tx_payment_id=$payment_id";
             
             if($this->zero_confirm){
                 $this->verify_zero_conf($payment_id, $amount_xmr2, $order_id);
@@ -368,7 +369,7 @@ class Monero_Gateway extends WC_Payment_Gateway
                 <!-- header -->
                 <div class='header-xmr-payment'>
                 <span class='logo-xmr'><img src='http://cdn.monerointegrations.com/logomonero.png' /></span>
-                <span class='xmr-payment-text-header'><h2>MONERO PAYMENT</h2></span>
+                <span class='xmr-payment-text-header'><h2>MASARI PAYMENT</h2></span>
                 </div>
                 <!-- end header -->
                 <!-- xmr content box -->
@@ -411,13 +412,13 @@ class Monero_Gateway extends WC_Payment_Gateway
             $amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
             $payment_id = $this->set_paymentid_cookie(8);
             $currency = $order->get_currency();
-            $amount_xmr2 = $this->changeto($amount, $currency, $payment_id);
+            $amount_xmr2 = $this->changeto($amount, $payment_id);
             
             $order->update_meta_data( "Payment ID", $payment_id);
-            $order->update_meta_data( "Amount requested (XMR)", $amount_xmr2);
+            $order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
             $order->save();
 
-            $uri = "monero:$address?tx_payment_id=$payment_id";
+            $uri = "masari:$address?tx_payment_id=$payment_id";
             $array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
             if (!isset($array_integrated_address)) {
                 $this->log->add('Monero_Gateway', '[ERROR] Unable get integrated address');
@@ -505,7 +506,7 @@ class Monero_Gateway extends WC_Payment_Gateway
 	return $sanatized_id;
     }
 
-    public function changeto($amount, $currency, $payment_id)
+    public function changeto($amount, $payment_id)
     {
         global $wpdb;
         // This will create a table named whatever the payment id is inside the database "WordPress"
@@ -533,7 +534,7 @@ class Monero_Gateway extends WC_Payment_Gateway
             }
         } else // If the row has not been created then the live exchange rate will be grabbed and stored
         {
-            $xmr_live_price = $this->retriveprice($currency);
+            $xmr_live_price = $this->retriveprice();
             $live_for_storing = $xmr_live_price * 100; //This will remove the decimal so that it can easily be stored as an integer
 
             $wpdb->query("INSERT INTO $payment_id (rate) VALUES ($live_for_storing)");
@@ -558,32 +559,14 @@ class Monero_Gateway extends WC_Payment_Gateway
     // Check if we are forcing SSL on checkout pages
     // Custom function not required by the Gateway
 
-    public function retriveprice($currency)
+    public function retriveprice()
     {
-        $xmr_price = file_get_contents('https://min-api.cryptocompare.com/data/price?fsym=XMR&tsyms=BTC,USD,EUR,CAD,INR,GBP,COP,SGD&extraParams=monero_woocommerce');
-        $price = json_decode($xmr_price, TRUE);
+        $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/USD');
+        $price = json_decode($msr_price, TRUE);
         if (!isset($price)) {
-            $this->log->add('Monero_Gateway', '[ERROR] Unable to get the price of Monero');
+            $this->log->add('Monero_Gateway', '[ERROR] Unable to get the market price of Masari');
         }
-        switch ($currency) {
-            case 'USD':
-                return $price['USD'];
-            case 'EUR':
-                return $price['EUR'];
-            case 'CAD':
-                return $price['CAD'];
-            case 'GBP':
-                return $price['GBP'];
-            case 'INR':
-                return $price['INR'];
-            case 'COP':
-                return $price['COP'];
-            case 'SGD':
-                return $price['SGD'];
-            case 'XMR':
-                $price = '1';
-                return $price;
-        }
+        return $price["Last"];
     }
     
     private function on_verified($payment_id, $amount_atomic_units, $order_id)
@@ -779,7 +762,7 @@ class Monero_Gateway extends WC_Payment_Gateway
         $port = $this->settings['daemon_port'];
         $monero_library = new Monero($host, $port);
         if ($monero_library->works() == true) {
-            echo "<div class=\"notice notice-success is-dismissible\"><p>Everything works! Congratulations and welcome to Monero. <button type=\"button\" class=\"notice-dismiss\">
+            echo "<div class=\"notice notice-success is-dismissible\"><p>Everything works! Congratulations and welcome to Masari. <button type=\"button\" class=\"notice-dismiss\">
 						<span class=\"screen-reader-text\">Dismiss this notice.</span>
 						</button></p></div>";
 

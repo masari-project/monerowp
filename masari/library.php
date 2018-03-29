@@ -184,7 +184,7 @@ class Monero_Library
         }
         // check for curl error
         if (0 < curl_errno($ch)) {
-           echo '[ERROR] Failed to connect to monero-wallet-rpc at ' . $this->host . ' port '. $this->port .'</br>';
+           echo '[ERROR] Failed to connect to masari-wallet-rpc at ' . $this->host . ' port '. $this->port .'</br>';
         }
         // close the connection
         curl_close($ch);
@@ -328,7 +328,7 @@ class NodeTools
         
         curl_setopt_array($curl, array(
                                        CURLOPT_RETURNTRANSFER => 1,
-                                       CURLOPT_URL => 'https://xmrchain.net/api/networkinfo',
+                                       CURLOPT_URL => 'https://msrchain.net/api/networkinfo',
                                        ));
         $resp = curl_exec($curl);
         curl_close($curl);
@@ -343,7 +343,7 @@ class NodeTools
         
         curl_setopt_array($curl, array(
                                        CURLOPT_RETURNTRANSFER => 1,
-                                       CURLOPT_URL => 'https://xmrchain.net/api/search/' . $height,
+                                       CURLOPT_URL => 'https://msrchain.net/api/search/' . $height,
                                        ));
         $resp = curl_exec($curl);
         curl_close($curl);
@@ -358,7 +358,7 @@ class NodeTools
         $curl = curl_init();
         curl_setopt_array($curl, array(
                                        CURLOPT_RETURNTRANSFER => 1,
-                                       CURLOPT_URL => 'https://xmrchain.net/api/outputs?txhash=' .$tx_hash . '&address='. $address . '&viewkey='. $viewKey .'&txprove=0',
+                                       CURLOPT_URL => 'https://msrchain.net/api/outputs?txhash=' .$tx_hash . '&address='. $address . '&viewkey='. $viewKey .'&txprove=0',
                                        ));
         $resp = curl_exec($curl);
         curl_close($curl);
@@ -383,7 +383,7 @@ class NodeTools
         
         curl_setopt_array($curl, array(
                                        CURLOPT_RETURNTRANSFER => 1,
-                                       CURLOPT_URL => 'https://xmrchain.net/api/mempool',
+                                       CURLOPT_URL => 'https://msrchain.net/api/mempool',
                                        ));
         $resp = curl_exec($curl);
         curl_close($curl);

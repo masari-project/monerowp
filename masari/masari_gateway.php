@@ -1,27 +1,26 @@
 <?php
 /*
-Plugin Name: Monero - WooCommerce Gateway
-Plugin URI: http://monerointegrations.com
-Description: Extends WooCommerce by Adding the Monero Gateway
+Plugin Name: Masari - WooCommerce Gateway
+Plugin URI: https://getmasari.org
+Description: Extends WooCommerce by Adding the Masari Gateway
 Version: 2.0
-Author: SerHack
-Author URI: http://monerointegrations.com
+Author: Masari Project
+Author URI: https://monerointegrations.com
 */
 
-// This code isn't for Dark Net Markets, please report them to Authority!
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 // Include our Gateway Class and register Payment Gateway with WooCommerce
-add_action('plugins_loaded', 'monero_init', 0);
-function monero_init()
+add_action('plugins_loaded', 'masari_init', 0);
+function masari_init()
 {
     /* If the class doesn't exist (== WooCommerce isn't installed), return NULL */
     if (!class_exists('WC_Payment_Gateway')) return;
 
 
     /* If we made it this far, then include our Gateway Class */
-    include_once('include/monero_payments.php');
+    include_once('include/masari_payments.php');
     require_once('library.php');
 
     // Lets add it too WooCommerce
@@ -51,8 +50,8 @@ add_action('admin_menu', 'monero_create_menu');
 function monero_create_menu()
 {
     add_menu_page(
-        __('Monero', 'textdomain'),
-        'Monero',
+        __('Masari', 'textdomain'),
+        'Masari',
         'manage_options',
         'admin.php?page=wc-settings&tab=checkout&section=monero_gateway',
         '',
