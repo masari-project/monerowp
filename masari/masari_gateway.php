@@ -13,6 +13,30 @@ if (!defined('ABSPATH')) {
 }
 // Include our Gateway Class and register Payment Gateway with WooCommerce
 add_action('plugins_loaded', 'masari_init', 0);
+
+
+function masari_gateway($methods)
+{
+	$methods[] = 'Monero_Gateway';
+	return $methods;
+}
+
+function masari_add_my_currency($currencies)
+{
+	$currencies['MSR'] = __('Masari', 'woocommerce');
+	return $currencies;
+}
+
+function masari_add_my_currency_symbol($currency_symbol, $currency)
+{
+	switch ($currency) {
+		case 'MSR':
+			$currency_symbol = 'MSR';
+			break;
+	}
+	return $currency_symbol;
+}
+
 function masari_init()
 {
     /* If the class doesn't exist (== WooCommerce isn't installed), return NULL */
@@ -22,14 +46,12 @@ function masari_init()
     /* If we made it this far, then include our Gateway Class */
     include_once('include/masari_payments.php');
     require_once('library.php');
-
-    // Lets add it too WooCommerce
-    add_filter('woocommerce_payment_gateways', 'monero_gateway');
-    function monero_gateway($methods)
-    {
-        $methods[] = 'Monero_Gateway';
-        return $methods;
-    }
+	
+	add_filter('woocommerce_currencies', 'masari_add_my_currency');
+	add_filter('woocommerce_currency_symbol', 'masari_add_my_currency_symbol', 10, 2);
+	
+	// Lets add it too WooCommerce
+	add_filter('woocommerce_payment_gateways', 'masari_gateway');
 }
 
 /*

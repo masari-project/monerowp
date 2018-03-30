@@ -14,7 +14,7 @@ class Monero_Gateway extends WC_Payment_Gateway
     private $confirmed = false;
     private $monero_daemon;
     private $non_rpc = false;
-    private $zero_cofirm = false;
+	private $zero_cofirm = false;
 
     function __construct()
     {
@@ -67,10 +67,9 @@ class Monero_Gateway extends WC_Payment_Gateway
         if (is_admin()) {
             /* Save Settings */
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-            add_filter('woocommerce_currencies', 'add_my_currency');
-            add_filter('woocommerce_currency_symbol', 'add_my_currency_symbol', 10, 2);
             add_action('woocommerce_email_before_order_table', array($this, 'email_instructions'), 10, 2);
         }
+		
         $this->monero_daemon = new Monero_Library($this->host, $this->port);
     }
 
@@ -173,22 +172,6 @@ class Monero_Gateway extends WC_Payment_Gateway
         );
     }
 
-    public function add_my_currency($currencies)
-    {
-        $currencies['MSR'] = __('Masari', 'woocommerce');
-        return $currencies;
-    }
-
-    function add_my_currency_symbol($currency_symbol, $currency)
-    {
-        switch ($currency) {
-            case 'MSR':
-                $currency_symbol = 'MSR';
-                break;
-        }
-        return $currency_symbol;
-    }
-
     public function admin_options()
     {
         $this->log->add('Monero_gateway', '[SUCCESS] Masari Settings OK');
@@ -269,7 +252,7 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     public function check_monero()
     {
-        $monero_address = $this->settings['monero_address'];
+        $monero_address = $this->settings['masari_address'];
         if (strlen($monero_address) == 95) {
             return true;
         }
