@@ -17,7 +17,7 @@ add_action('plugins_loaded', 'masari_init', 0);
 
 function masari_gateway($methods)
 {
-	$methods[] = 'Monero_Gateway';
+	$methods[] = 'Masari_Gateway';
 	return $methods;
 }
 
@@ -87,7 +87,7 @@ function monero_create_menu()
         'manage_options',
         'admin.php?page=wc-settings&tab=checkout&section=masari_gateway',
         '',
-        plugins_url('masari/assets/monero_icon.png'),
+        plugins_url('masari/assets/masari_icon_small.png'),
         56 // Position on menu, woocommerce has 55.5, products has 55.6
 
     );
