@@ -58,11 +58,11 @@ function masari_init()
  * Add custom link
  * The url will be http://yourworpress/wp-admin/admin.php?=wc-settings&tab=checkout
  */
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'monero_payment');
-function monero_payment($links)
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'masari_payment');
+function masari_payment($links)
 {
     $plugin_links = array(
-        '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout') . '">' . __('Settings', 'monero_payment') . '</a>',
+        '<a href="' . admin_url('admin.php?page=wc-settings&tab=checkout') . '">' . __('Settings', 'masari_payment') . '</a>',
     );
 
     return array_merge($plugin_links, $links);
@@ -75,9 +75,9 @@ function monero_create_menu()
         __('Masari', 'textdomain'),
         'Masari',
         'manage_options',
-        'admin.php?page=wc-settings&tab=checkout&section=monero_gateway',
+        'admin.php?page=wc-settings&tab=checkout&section=masari_gateway',
         '',
-        plugins_url('monero/assets/monero_icon.png'),
+        plugins_url('masari/assets/monero_icon.png'),
         56 // Position on menu, woocommerce has 55.5, products has 55.6
 
     );

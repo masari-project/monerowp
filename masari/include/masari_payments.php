@@ -7,7 +7,7 @@
  */
 
 
-class Monero_Gateway extends WC_Payment_Gateway
+class Masari_Gateway extends WC_Payment_Gateway
 {
     private $reloadTime = 17000;
     private $discount;
@@ -18,10 +18,10 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     function __construct()
     {
-        $this->id = "monero_gateway";
-        $this->method_title = __("Masari GateWay", 'monero_gateway');
-        $this->method_description = __("Masari Payment Gateway Plug-in for WooCommerce. You can find more information about this payment gateway on our website. You'll need a daemon online for your address.", 'monero_gateway');
-        $this->title = __("Masari Gateway", 'monero_gateway');
+        $this->id = "masari_gateway";
+        $this->method_title = __("Masari GateWay", 'masari_gateway');
+        $this->method_description = __("Masari Payment Gateway Plug-in for WooCommerce. You can find more information about this payment gateway on our website. You'll need a daemon online for your address.", 'masari_gateway');
+        $this->title = __("Masari Gateway", 'masari_gateway');
         $this->version = "2.0";
         //
         $this->icon = apply_filters('woocommerce_offline_icon', '');
@@ -82,91 +82,91 @@ class Monero_Gateway extends WC_Payment_Gateway
     {
         $this->form_fields = array(
             'enabled' => array(
-                'title' => __('Enable / Disable', 'monero_gateway'),
-                'label' => __('Enable this payment gateway', 'monero_gateway'),
+                'title' => __('Enable / Disable', 'masari_gateway'),
+                'label' => __('Enable this payment gateway', 'masari_gateway'),
                 'type' => 'checkbox',
                 'default' => 'no'
             ),
 
             'title' => array(
-                'title' => __('Title', 'monero_gateway'),
+                'title' => __('Title', 'masari_gateway'),
                 'type' => 'text',
-                'desc_tip' => __('Payment title the customer will see during the checkout process.', 'monero_gateway'),
-                'default' => __('Masari Currency', 'monero_gateway')
+                'desc_tip' => __('Payment title the customer will see during the checkout process.', 'masari_gateway'),
+                'default' => __('Masari Currency', 'masari_gateway')
             ),
             'description' => array(
-                'title' => __('Description', 'monero_gateway'),
+                'title' => __('Description', 'masari_gateway'),
                 'type' => 'textarea',
-                'desc_tip' => __('Payment description the customer will see during the checkout process.', 'monero_gateway'),
-                'default' => __('Pay securely using MSR.', 'monero_gateway')
+                'desc_tip' => __('Payment description the customer will see during the checkout process.', 'masari_gateway'),
+                'default' => __('Pay securely using MSR.', 'masari_gateway')
 
             ),
             'use_viewKey' => array(
-                'title' => __('Use ViewKey', 'monero_gateway'),
-                'label' => __(' Verify Transaction with ViewKey ', 'monero_gateway'),
+                'title' => __('Use ViewKey', 'masari_gateway'),
+                'label' => __(' Verify Transaction with ViewKey ', 'masari_gateway'),
                 'type' => 'checkbox',
-                'description' => __('Fill in the Address and ViewKey fields to verify transactions with your ViewKey', 'monero_gateway'),
+                'description' => __('Fill in the Address and ViewKey fields to verify transactions with your ViewKey', 'masari_gateway'),
                 'default' => 'no'
             ),
             'masari_address' => array(
-                'title' => __('Masari Address', 'monero_gateway'),
+                'title' => __('Masari Address', 'masari_gateway'),
                 'label' => __('Useful for people that have not a daemon online'),
                 'type' => 'text',
-                'desc_tip' => __('Masari Wallet Address', 'monero_gateway')
+                'desc_tip' => __('Masari Wallet Address', 'masari_gateway')
             ),
             'viewKey' => array(
-                'title' => __('Secret ViewKey', 'monero_gateway'),
+                'title' => __('Secret ViewKey', 'masari_gateway'),
                 'label' => __('Secret ViewKey'),
                 'type' => 'text',
-                'desc_tip' => __('Your secret ViewKey', 'monero_gateway')
+                'desc_tip' => __('Your secret ViewKey', 'masari_gateway')
             ),
             'use_rpc' => array(
-                'title' => __('Use masari-wallet-rpc', 'monero_gateway'),
-                'label' => __(' Verify transactions with the masari-wallet-rpc ', 'monero_gateway'),
+                'title' => __('Use masari-wallet-rpc', 'masari_gateway'),
+                'label' => __(' Verify transactions with the masari-wallet-rpc ', 'masari_gateway'),
                 'type' => 'checkbox',
-                'description' => __('This must be setup seperatly', 'monero_gateway'),
+                'description' => __('This must be setup seperatly', 'masari_gateway'),
                 'default' => 'no'
             ),
             'daemon_host' => array(
-                'title' => __('Masari wallet rpc Host/ IP', 'monero_gateway'),
+                'title' => __('Masari wallet rpc Host/ IP', 'masari_gateway'),
                 'type' => 'text',
-                'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'monero_gateway'),
+                'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'masari_gateway'),
                 'default' => 'localhost',
             ),
             'daemon_port' => array(
-                'title' => __('Masari wallet rpc port', 'monero_gateway'),
+                'title' => __('Masari wallet rpc port', 'masari_gateway'),
                 'type' => 'text',
-                'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'monero_gateway'),
+                'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'masari_gateway'),
                 'default' => '18080',
             ),
             'discount' => array(
-                'title' => __('% discount for using MSR', 'monero_gateway'),
+                'title' => __('% discount for using MSR', 'masari_gateway'),
 
-                'desc_tip' => __('Provide a discount to your customers for making a private payment with MSR!', 'monero_gateway'),
-                'description' => __('Do you want to spread the word about Masari? Offer a small discount! Leave this empty if you do not wish to provide a discount', 'monero_gateway'),
+                'desc_tip' => __('Provide a discount to your customers for making a private payment with MSR!', 'masari_gateway'),
+                'description' => __('Do you want to spread the word about Masari? Offer a small discount! Leave this empty if you do not wish to provide a discount', 'masari_gateway'),
                 'type' => __('number'),
                 'default' => '5'
 
             ),
             'environment' => array(
-                'title' => __(' Testnet', 'monero_gateway'),
-                'label' => __(' Check this if you are using testnet ', 'monero_gateway'),
+                'title' => __(' Testnet', 'masari_gateway'),
+                'label' => __(' Check this if you are using testnet ', 'masari_gateway'),
                 'type' => 'checkbox',
-                'description' => __('Check this box if you are using testnet', 'monero_gateway'),
+                'description' => __('Check this box if you are using testnet', 'masari_gateway'),
                 'default' => 'no'
             ),
             'zero_conf' => array(
-                'title' => __(' Accept 0 conf txs', 'monero_gateway'),
-                'label' => __(' Accept 0-confirmation transactions ', 'monero_gateway'),
+                'title' => __(' Accept 0 conf txs', 'masari_gateway'),
+                'label' => __(' Accept 0-confirmation transactions ', 'masari_gateway'),
                 'type' => 'checkbox',
-                'description' => __('This is faster but less secure', 'monero_gateway'),
+                'description' => __('This is faster but less secure', 'masari_gateway'),
                 'default' => 'no'
             ),
             'onion_service' => array(
-                'title' => __(' SSL warnings ', 'monero_gateway'),
-                'label' => __(' Check to Silence SSL warnings', 'monero_gateway'),
+                'title' => __(' SSL warnings ', 'masari_gateway'),
+                'label' => __(' Check to Silence SSL warnings', 'masari_gateway'),
                 'type' => 'checkbox',
-                'description' => __('Check this box if you are running on an Onion Service (Suppress SSL errors)', 'monero_gateway'),
+                'description' => __('Check this box if you are running on an Onion Service (Suppress SSL errors)', 'masari_gateway'),
                 'default' => 'no'
             ),
         );
@@ -174,9 +174,8 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     public function admin_options()
     {
-        $this->log->add('Monero_gateway', '[SUCCESS] Masari Settings OK');
+        $this->log->add('masari_gateway', '[SUCCESS] Masari Settings OK');
         echo "<h1>Masari Payment Gateway</h1>";
-
         echo "<p>Welcome to Masari Extension for WooCommerce. Getting started: Make a connection with daemon";
         echo "<div style='border:1px solid #DDD;padding:5px 10px;font-weight:bold;color:#223079;background-color:#9ddff3;'>";
         
@@ -194,7 +193,7 @@ class Monero_Gateway extends WC_Payment_Gateway
     {
         $wallet_amount = $this->monero_daemon->getbalance();
         if (!isset($wallet_amount)) {
-            $this->log->add('Monero_gateway', '[ERROR] Can not connect to masari-wallet-rpc');
+            $this->log->add('masari_gateway', '[ERROR] Can not connect to masari-wallet-rpc');
             echo "</br>Your balance is: Not Avaliable </br>";
             echo "Unlocked balance: Not Avaliable";
         }
@@ -214,7 +213,7 @@ class Monero_Gateway extends WC_Payment_Gateway
     public function process_payment($order_id)
     {
         $order = wc_get_order($order_id);
-        $order->update_status('on-hold', __('Awaiting offline payment', 'monero_gateway'));
+        $order->update_status('on-hold', __('Awaiting offline payment', 'masari_gateway'));
         // Reduce stock levels
         $order->reduce_order_stock();
 
@@ -252,8 +251,8 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     public function check_monero()
     {
-        $monero_address = $this->settings['masari_address'];
         if (strlen($monero_address) == 95) {
+            $masari_address = $this->settings['masari_address'];
             return true;
         }
         return false;
@@ -404,7 +403,7 @@ class Monero_Gateway extends WC_Payment_Gateway
             $uri = "masari:$address?tx_payment_id=$payment_id";
             $array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
             if (!isset($array_integrated_address)) {
-                $this->log->add('Monero_Gateway', '[ERROR] Unable get integrated address');
+                $this->log->add('masari_gateway', '[ERROR] Unable get integrated address');
                 // Seems that we can't connect with daemon, then set array_integrated_address, little hack
                 $array_integrated_address["integrated_address"] = $address;
             }
@@ -547,7 +546,7 @@ class Monero_Gateway extends WC_Payment_Gateway
         $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/USD');
         $price = json_decode($msr_price, TRUE);
         if (!isset($price)) {
-            $this->log->add('Monero_Gateway', '[ERROR] Unable to get the market price of Masari');
+            $this->log->add('masari_gateway', '[ERROR] Unable to get the market price of Masari');
         }
         return $price["Last"];
     }
@@ -555,15 +554,15 @@ class Monero_Gateway extends WC_Payment_Gateway
     private function on_verified($payment_id, $amount_atomic_units, $order_id)
     {
         $message = "Payment has been received and confirmed. Thanks!";
-        $this->log->add('Monero_gateway', '[SUCCESS] Payment has been recorded. Congratulations!');
+        $this->log->add('masari_gateway', '[SUCCESS] Payment has been recorded. Congratulations!');
         $this->confirmed = true;
         $order = wc_get_order($order_id);
         
         if($this->is_virtual_in_cart($order_id) == true){
-            $order->update_status('completed', __('Payment has been received.', 'monero_gateway'));
+            $order->update_status('completed', __('Payment has been received.', 'masari_gateway'));
         }
         else{
-            $order->update_status('processing', __('Payment has been received.', 'monero_gateway')); // Show payment id used for order
+            $order->update_status('processing', __('Payment has been received.', 'masari_gateway')); // Show payment id used for order
         }
         global $wpdb;
         $wpdb->query("DROP TABLE $payment_id"); // Drop the table from database after payment has been confirmed as it is no longer needed
@@ -750,7 +749,7 @@ class Monero_Gateway extends WC_Payment_Gateway
 						</button></p></div>";
 
         } else {
-            $this->log->add('Monero_gateway', '[ERROR] Plugin can not reach wallet rpc.');
+            $this->log->add('masari_gateway', '[ERROR] Plugin can not reach wallet rpc.');
             echo "<div class=\" notice notice-error\"><p>Error with connection of daemon, see documentation!</p></div>";
         }
     }
