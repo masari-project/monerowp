@@ -15,7 +15,7 @@ Wordpress is the backend tool that is needed to use WooCommerce and this Masari 
 This Masari plugin is an extension of WooCommerce, which works with WordPress
 
 ## Step 1: Activating the plugin
-* Downloading: First of all, you will need to download the plugin. You can download the latest source code from GitHub. This can be done with the command `git clone https://github.com/masari-project/monerowp.git`
+* Downloading: First of all, you will need to download the plugin. You can download the latest source code from GitHub. This can be done with the command `git clone https://github.com/masari-project/masariwp.git`
 
 * Put the plugin in the correct directory: You will need to put the folder named `masari` from this repo/unzipped release into the wordpress plugins directory. This can be found at `path/to/wordpress/folder/wp-content/plugins`
 
@@ -36,7 +36,7 @@ To do this: start the masari daemon on your server and leave it running in the b
 
 ### Setup your  masari wallet-rpc
 
-* Setup a masari wallet using the masari-wallet-cli tool. If you do not know how to do this you can learn about it at [getmasari.org](https://getmasri.org)
+* Setup a masari wallet using the masari-wallet-cli tool. If you do not know how to do this you can learn about it at [getmasari.org](https://getmasari.org)
 
 * [Create a view-only wallet from that wallet for security.](https://monero.stackexchange.com/questions/3178/how-to-create-a-view-only-wallet-for-the-gui/4582#4582)
 
