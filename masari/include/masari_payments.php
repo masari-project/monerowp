@@ -91,6 +91,18 @@ class Masari_Gateway extends WC_Payment_Gateway
 		
         $this->monero_daemon = new Monero_Library($this->host, $this->port);
     }
+    
+    public static function install(){
+		global $wpdb;
+		// This will create a table named whatever the payment id is inside the database "WordPress"
+		$create_table = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."masari_gateway_payments_rate(
+									rate INT NOT NULL,
+									payment_id VARCHAR(64) PRIMARY KEY,
+									payed boolean NOT NULL DEFAULT 0,
+									order_id INT NOT NULL
+									)";
+		$wpdb->query($create_table);
+	}
 
     public function get_icon(){
 		$pluginDirectory = plugin_dir_url(__FILE__).'../';
@@ -317,7 +329,7 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
 		$payment_id = $this->set_paymentid_cookie(32);
 		$currency = $order->get_currency();
-		$amount_xmr2 = $this->changeto( $amount, $payment_id);
+		$amount_xmr2 = $this->changeto( $amount, $payment_id, $order_id);
 		$address = $this->address;
 		
 		$order->update_meta_data( "Payment ID", $payment_id);
@@ -372,18 +384,13 @@ class Masari_Gateway extends WC_Payment_Gateway
 		return $sanatized_id;
     }
 
-    public function changeto($amount, $payment_id)
+    public function changeto($amount, $payment_id, $order_id)
     {
         global $wpdb;
-        // This will create a table named whatever the payment id is inside the database "WordPress"
-        $create_table = "CREATE TABLE IF NOT EXISTS $payment_id (
-									rate INT
-									)";
-        $wpdb->query($create_table);
-        $rows_num = $wpdb->get_results("SELECT count(*) as count FROM $payment_id");
+        $rows_num = $wpdb->get_results("SELECT count(*) as count FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
         if ($rows_num[0]->count > 0) // Checks if the row has already been created or not
         {
-            $stored_rate = $wpdb->get_results("SELECT rate FROM $payment_id");
+            $stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
 
             $stored_rate_transformed = $stored_rate[0]->rate / 100; //this will turn the stored rate back into a decimaled number
 
@@ -403,7 +410,7 @@ class Masari_Gateway extends WC_Payment_Gateway
             $xmr_live_price = $this->retrievePrice();
             $live_for_storing = $xmr_live_price * 100; //This will remove the decimal so that it can easily be stored as an integer
 
-            $wpdb->query("INSERT INTO $payment_id (rate) VALUES ($live_for_storing)");
+            $wpdb->query("INSERT INTO ".$wpdb->prefix."masari_gateway_payments_rate (payment_id,rate,order_id) VALUES ('".$payment_id."',$live_for_storing, $order_id)");
             if(isset($this->discount))
             {
                $new_amount = $amount / $xmr_live_price;
@@ -447,8 +454,9 @@ class Masari_Gateway extends WC_Payment_Gateway
         else{
             $order->update_status('processing', __('Payment has been received.', 'masari_gateway')); // Show payment id used for order
         }
+        
         global $wpdb;
-        $wpdb->query("DROP TABLE $payment_id"); // Drop the table from database after payment has been confirmed as it is no longer needed
+		$wpdb->query("UPDATE ".$wpdb->prefix."masari_gateway_payments_rate SET payed=true WHERE payment_id='".$payment_id."'");
                          
         $this->reloadTime = 3000000000000; // Greatly increase the reload time as it is no longer needed
     }

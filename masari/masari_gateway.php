@@ -94,3 +94,9 @@ function monero_create_menu()
 }
 
 
+//register for installation
+function masari_plugin_activate() {
+	include_once('include/masari_payments.php');
+	Masari_Gateway::install();
+}
+register_activation_hook( __FILE__, 'masari_plugin_activate' );
