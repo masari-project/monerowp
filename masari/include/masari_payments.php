@@ -71,7 +71,7 @@ class Monero_Gateway extends WC_Payment_Gateway
             add_filter('woocommerce_currency_symbol', 'add_my_currency_symbol', 10, 2);
             add_action('woocommerce_email_before_order_table', array($this, 'email_instructions'), 10, 2);
         }
-        $this->monero_daemon = new Monero_Library($this->host, $this->port);
+#        $this->monero_daemon = new Monero_Library($this->host, $this->port);
     }
 
     public function get_icon()
