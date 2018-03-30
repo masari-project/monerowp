@@ -2,7 +2,7 @@
 
 /* 
  * Main Gateway of Monero using a daemon online 
- * Authors: Serhack and cryptochangements
+ * Authors: Serhack, cryptochangements and gnock
  * Modified to work with Masari
  */
 
@@ -14,7 +14,26 @@ class Masari_Gateway extends WC_Payment_Gateway
     private $confirmed = false;
     private $monero_daemon;
     private $non_rpc = false;
-	private $zero_cofirm = false;
+	
+	private $version;
+	/** @var WC_Logger  */
+	private $log;
+	/** @var string|null  */
+	private $host;
+	/** @var string|null  */
+	private $port;
+	/** @var string|null  */
+	private $address;
+	/** @var string|null  */
+	private $viewKey;
+	/** @var string|null  */
+	private $accept_zero_conf;
+	/** @var string|null  */
+	private $use_viewKey;
+	/** @var string|null  */
+	private $use_rpc;
+	/** @var bool  */
+	private $zero_confirm;
 
     function __construct()
     {
@@ -246,13 +265,12 @@ class Masari_Gateway extends WC_Payment_Gateway
 
     }
 
-
     // Validate fields
 
     public function check_monero()
     {
+        $masari_address = $this->settings['masari_address'];
         if (strlen($masari_address) == 95) {
-            $masari_address = $this->settings['masari_address'];
             return true;
         }
         return false;
@@ -270,19 +288,15 @@ class Masari_Gateway extends WC_Payment_Gateway
     }
     public function check_checkedBoxes()
     {
-        if($this->use_viewKey == 'yes')
-        {
-            if($this->use_rpc == 'yes')
-            {
+        if($this->use_viewKey == 'yes'){
+            if($this->use_rpc == 'yes'){
                 return true;
             }
         }
-        else
-            return false;
+        return false;
     }
     
-    public function is_virtual_in_cart($order_id)
-    {
+    public function is_virtual_in_cart($order_id){
         $order = wc_get_order( $order_id );
         $items = $order->get_items();
         
@@ -335,6 +349,7 @@ class Masari_Gateway extends WC_Payment_Gateway
 		}
 		
 		$transactionConfirmed = $this->confirmed;
+		$pluginIdentifier = 'masari_gateway';
 		include 'html/paymentBox.php';
     }
 
@@ -354,7 +369,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         // Limit payment id to alphanumeric characters
         $sanatized_id = preg_replace("/[^a-zA-Z0-9]+/", "", $payment_id);
-	return $sanatized_id;
+		return $sanatized_id;
     }
 
     public function changeto($amount, $payment_id)
@@ -385,7 +400,7 @@ class Masari_Gateway extends WC_Payment_Gateway
             }
         } else // If the row has not been created then the live exchange rate will be grabbed and stored
         {
-            $xmr_live_price = $this->retriveprice();
+            $xmr_live_price = $this->retrievePrice();
             $live_for_storing = $xmr_live_price * 100; //This will remove the decimal so that it can easily be stored as an integer
 
             $wpdb->query("INSERT INTO $payment_id (rate) VALUES ($live_for_storing)");
@@ -410,7 +425,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     // Check if we are forcing SSL on checkout pages
     // Custom function not required by the Gateway
 
-    public function retriveprice()
+    public function retrievePrice()
     {
         $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/USD');
         $price = json_decode($msr_price, TRUE);
@@ -493,8 +508,8 @@ class Masari_Gateway extends WC_Payment_Gateway
         $txs_from_block = $tools->get_txs_from_block($bc_height);
         $tx_count = count($txs_from_block) - 1; // The tx at index 0 is a coinbase tx so it can be ignored
         
-        $output_found;
-        $block_index;
+        $output_found = null;
+        $block_index = null;
         
         if($block_difference != 0)
         {
@@ -564,7 +579,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         $txs_from_mempool = $tools->get_mempool_txs();;
         $tx_count = count($txs_from_mempool['data']['txs']);
         $i = 0;
-        $output_found;
+        $output_found = null;
         
         while($i <= $tx_count)
         {
@@ -607,12 +622,11 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         $host = $this->settings['daemon_host'];
         $port = $this->settings['daemon_port'];
-        $monero_library = new Monero($host, $port);
-        if ($monero_library->works() == true) {
+        $masariLibrary = new Monero_Library($host, $port);
+        if ($masariLibrary->works() == true) {
             echo "<div class=\"notice notice-success is-dismissible\"><p>Everything works! Congratulations and welcome to Masari. <button type=\"button\" class=\"notice-dismiss\">
 						<span class=\"screen-reader-text\">Dismiss this notice.</span>
 						</button></p></div>";
-
         } else {
             $this->log->add('masari_gateway', '[ERROR] Plugin can not reach wallet rpc.');
             echo "<div class=\" notice notice-error\"><p>Error with connection of daemon, see documentation!</p></div>";
