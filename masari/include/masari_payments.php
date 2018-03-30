@@ -269,8 +269,8 @@ class Monero_Gateway extends WC_Payment_Gateway
 
     public function check_monero()
     {
-        $monero_address = $this->settings['monero_address'];
-        if (strlen($monero_address) == 95) {
+        $masari_address = $this->settings['masari_address'];
+        if (strlen($masari_address) == 95) {
             return true;
         }
         return false;
