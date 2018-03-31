@@ -1,7 +1,7 @@
 # MasariWP
 A WooCommerce extension for accepting Masari currency
 
-## Dependancies
+## Dependencies
 This plugin is rather simple but there are a few things that need to be set up before hand.
 
 * A web server! Ideally with the most recent versions of PHP and mysql

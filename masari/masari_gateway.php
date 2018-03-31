@@ -78,8 +78,8 @@ function masari_payment($links)
     return array_merge($plugin_links, $links);
 }
 
-add_action('admin_menu', 'monero_create_menu');
-function monero_create_menu()
+add_action('admin_menu', 'masari_create_menu');
+function masari_create_menu()
 {
     add_menu_page(
         __('Masari', 'textdomain'),

@@ -12,7 +12,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     private $reloadTime = 17000;
     private $discount;
     private $confirmed = false;
-    private $monero_daemon;
+    private $masari_daemon;
     private $non_rpc = false;
 	
 	private $version;
@@ -89,7 +89,7 @@ class Masari_Gateway extends WC_Payment_Gateway
             add_action('woocommerce_email_before_order_table', array($this, 'email_instructions'), 10, 2);
         }
 		
-        $this->monero_daemon = new Monero_Library($this->host, $this->port);
+        $this->masari_daemon = new Masari_Library($this->host, $this->port);
     }
     
     public static function install(){
@@ -168,7 +168,7 @@ class Masari_Gateway extends WC_Payment_Gateway
                 'title' => __('Masari wallet rpc port', 'masari_gateway'),
                 'type' => 'text',
                 'desc_tip' => __('This is the Daemon Host/IP to authorize the payment with port', 'masari_gateway'),
-                'default' => '18080',
+                'default' => '38082',
             ),
             'discount' => array(
                 'title' => __('% discount for using MSR', 'masari_gateway'),
@@ -217,12 +217,12 @@ class Masari_Gateway extends WC_Payment_Gateway
         echo "<table class='form-table'>";
         $this->generate_settings_html();
         echo "</table>";
-        echo "<h4>Learn more about using masari-wallet-rpc <a href=\"https://github.com/masari-project/monerowp/blob/master/README.md\">here</a> and viewkeys <a href=\"https://getmonero.org/resources/moneropedia/viewkey.html\">here</a> </h4>";
+        echo "<h4>Learn more about using masari-wallet-rpc <a href=\"https://github.com/masari-project/masariwp/blob/master/README.md\">here</a> and viewkeys <a href=\"https://getmonero.org/resources/moneropedia/viewkey.html\">here</a> </h4>";
     }
 
     public function getamountinfo()
     {
-        $wallet_amount = $this->monero_daemon->getbalance();
+        $wallet_amount = $this->masari_daemon->getbalance();
         if (!isset($wallet_amount)) {
             $this->log->add('masari_gateway', '[ERROR] Can not connect to masari-wallet-rpc');
             echo "</br>Your balance is: Not Avaliable </br>";
@@ -236,8 +236,8 @@ class Masari_Gateway extends WC_Payment_Gateway
             $unlocked_wallet_amount = $wallet_amount['unlocked_balance'] / 1000000000000;
             $unlocked_amount_rounded = round($unlocked_wallet_amount, 6);
         
-            echo "Your balance is: " . $real_amount_rounded . " XMR </br>";
-            echo "Unlocked balance: " . $unlocked_amount_rounded . " XMR </br>";
+            echo "Your balance is: " . $real_amount_rounded . " MSR </br>";
+            echo "Unlocked balance: " . $unlocked_amount_rounded . " MSR </br>";
         }
     }
 
@@ -263,7 +263,7 @@ class Masari_Gateway extends WC_Payment_Gateway
 
     public function validate_fields()
     {
-        if ($this->check_monero() != TRUE) {
+        if ($this->check_masari() != TRUE) {
             echo "<div class=\"error\"><p>Your Masari Address doesn't look valid. Have you checked it?</p></div>";
         }
         if(!$this->check_viewKey())
@@ -272,14 +272,14 @@ class Masari_Gateway extends WC_Payment_Gateway
         }
         if($this->check_checkedBoxes())
         {
-            echo "<div class=\"error\"><p>You must choose to either use monero-wallet-rpc or a ViewKey, not both</p></div>";
+            echo "<div class=\"error\"><p>You must choose to either use masari-wallet-rpc or a ViewKey, not both</p></div>";
         }
 
     }
 
     // Validate fields
 
-    public function check_monero()
+    public function check_masari()
     {
         $masari_address = $this->settings['masari_address'];
         if (strlen($masari_address) == 95) {
@@ -329,35 +329,35 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
 		$payment_id = $this->set_paymentid_cookie(32);
 		$currency = $order->get_currency();
-		$amount_xmr2 = $this->changeto( $amount, $currency, $payment_id, $order_id);
+		$amount_msr2 = $this->changeto( $amount, $currency, $payment_id, $order_id);
 		$address = $this->address;
 		
 		$order->update_meta_data( "Payment ID", $payment_id);
-		$order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
+		$order->update_meta_data( "Amount requested (MSR)", $amount_msr2);
 		$order->save();
 	
-		if($amount_xmr2 !== null){
+		if($amount_msr2 !== null){
 			$qrUri = "masari:$address?tx_payment_id=$payment_id";
 			
 			if($this->non_rpc){
 				if(!isset($address)){
-					// If there isn't address (merchant missed that field!), $address will be the Monero address for donating :)
+					// If there isn't address (merchant missed that field!), $address will be the Masari address for donating :)
 					$address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
 				}
 				
 				if($this->zero_confirm){
-					$this->verify_zero_conf($payment_id, $amount_xmr2, $order_id);
+					$this->verify_zero_conf($payment_id, $amount_msr2, $order_id);
 				}else{
-					$this->verify_non_rpc($payment_id, $amount_xmr2, $order_id);
+					$this->verify_non_rpc($payment_id, $amount_msr2, $order_id);
 				}
 			}else{
-				$array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
+				$array_integrated_address = $this->masari_daemon->make_integrated_address($payment_id);
 				if(!isset($array_integrated_address)){
-					$this->log->add('Monero_Gateway', '[ERROR] Unable get integrated address');
+					$this->log->add('Masari_Gateway', '[ERROR] Unable get integrated address');
 					// Seems that we can't connect with daemon, then set array_integrated_address, little hack
 					$array_integrated_address["integrated_address"] = $address;
 				}
-				$this->verify_payment($payment_id, $amount_xmr2, $order);
+				$this->verify_payment($payment_id, $amount_msr2, $order);
 			}
 		}
 		
@@ -396,14 +396,14 @@ class Masari_Gateway extends WC_Payment_Gateway
 			$rate = $stored_rate[0]->rate / 10000; //this will turn the stored rate back into a decimaled number
         } else // If the row has not been created then the live exchange rate will be grabbed and stored
         {
-            $xmr_live_price = $this->retrievePrice($fiatCurrency);
-            if($xmr_live_price === null)
+            $msr_live_price = $this->retrievePrice($fiatCurrency);
+            if($msr_live_price === null)
             	return null;
             
-            $live_for_storing = $xmr_live_price * 10000; //This will remove the decimal so that it can easily be stored as an integer
+            $live_for_storing = $msr_live_price * 10000; //This will remove the decimal so that it can easily be stored as an integer
 
             $wpdb->query("INSERT INTO ".$wpdb->prefix."masari_gateway_payments_rate (payment_id,rate,order_id) VALUES ('".$payment_id."',$live_for_storing, $order_id)");
-			$rate = $xmr_live_price;
+			$rate = $msr_live_price;
         }
 	
 		if (isset($this->discount)) {
@@ -495,7 +495,7 @@ class Masari_Gateway extends WC_Payment_Gateway
          * Check if a payment has been made with this payment id then notify the merchant
          */
         $amount_atomic_units = $amount * 1000000000000;
-        $get_payments_method = $this->monero_daemon->get_payments($payment_id);
+        $get_payments_method = $this->masari_daemon->get_payments($payment_id);
         if (isset($get_payments_method["payments"][0]["amount"])) {
             if ($get_payments_method["payments"][0]["amount"] >= $amount_atomic_units)
             {
@@ -657,7 +657,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         $host = $this->settings['daemon_host'];
         $port = $this->settings['daemon_port'];
-        $masariLibrary = new Monero_Library($host, $port);
+        $masariLibrary = new Masari_Library($host, $port);
         if ($masariLibrary->works() == true) {
             echo "<div class=\"notice notice-success is-dismissible\"><p>Everything works! Congratulations and welcome to Masari. <button type=\"button\" class=\"notice-dismiss\">
 						<span class=\"screen-reader-text\">Dismiss this notice.</span>
