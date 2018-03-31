@@ -47,13 +47,13 @@
 			</div>
 			<div class="data-box" >
 				<label><?php _e('Address', $pluginIdentifier) ?></label>
-				<input id="msr_address" disabled="disabled" type="text" class="value" value="<?= $address ?>">
+				<input id="msr_address" disabled="disabled" type="text" class="value" value="<?= $displayedPaymentAddress ?>">
 				<button class="copy" onclick="setTextInClipboard('msr_address')" title="<?php _e('Copy', $pluginIdentifier) ?>"><i class="material-icons" >content_copy</i></button>
 			</div>
-			<?php if(isset($payment_id)): ?>
+			<?php if(isset($displayedPaymentId) && $displayedPaymentId !== null): ?>
 			<div class="data-box" >
 				<label><?php _e('Payment ID', $pluginIdentifier) ?></label>
-				<input id="msr_paymentId" type="text" disabled="disabled" class="value" value="<?= $payment_id ?>">
+				<input id="msr_paymentId" type="text" disabled="disabled" class="value" value="<?= $displayedPaymentId ?>">
 				<button class="copy" onclick="setTextInClipboard('msr_paymentId')" title="<?php _e('Copy', $pluginIdentifier) ?>"><i class="material-icons" >content_copy</i></button>
 			</div>
 			<?php endif; ?>
