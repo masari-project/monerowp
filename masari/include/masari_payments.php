@@ -327,7 +327,12 @@ class Masari_Gateway extends WC_Payment_Gateway
     	$pluginDirectory = plugin_dir_url(__FILE__).'../';
 		$order = wc_get_order($order_id);
 		$amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
-		$payment_id = $this->set_paymentid_cookie(32);
+	        if($this->non_rpc){
+		   $payment_id = $this->set_paymentid_cookie(32);
+		}
+	    	else{
+		   $payment_id = $this->set_paymentid_cookie(8);
+		}
 		$currency = $order->get_currency();
 		$amount_msr2 = $this->changeto( $amount, $currency, $payment_id, $order_id);
 		$address = $this->address;
