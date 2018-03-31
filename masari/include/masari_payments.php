@@ -329,35 +329,36 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
 		$payment_id = $this->set_paymentid_cookie(32);
 		$currency = $order->get_currency();
-		$amount_xmr2 = $this->changeto( $amount, $payment_id, $order_id);
+		$amount_xmr2 = $this->changeto( $amount, $currency, $payment_id, $order_id);
 		$address = $this->address;
 		
 		$order->update_meta_data( "Payment ID", $payment_id);
 		$order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
 		$order->save();
 	
-		$qrUri = "masari:$address?tx_payment_id=$payment_id";
-		
-		if($this->non_rpc){
-			if (!isset($address)) {
-				// If there isn't address (merchant missed that field!), $address will be the Monero address for donating :)
-				$address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
-			}
+		if($amount_xmr2 !== null){
+			$qrUri = "masari:$address?tx_payment_id=$payment_id";
 			
-			if($this->zero_confirm){
-				$this->verify_zero_conf($payment_id, $amount_xmr2, $order_id);
+			if($this->non_rpc){
+				if(!isset($address)){
+					// If there isn't address (merchant missed that field!), $address will be the Monero address for donating :)
+					$address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
+				}
+				
+				if($this->zero_confirm){
+					$this->verify_zero_conf($payment_id, $amount_xmr2, $order_id);
+				}else{
+					$this->verify_non_rpc($payment_id, $amount_xmr2, $order_id);
+				}
+			}else{
+				$array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
+				if(!isset($array_integrated_address)){
+					$this->log->add('Monero_Gateway', '[ERROR] Unable get integrated address');
+					// Seems that we can't connect with daemon, then set array_integrated_address, little hack
+					$array_integrated_address["integrated_address"] = $address;
+				}
+				$this->verify_payment($payment_id, $amount_xmr2, $order);
 			}
-			else{
-				$this->verify_non_rpc($payment_id, $amount_xmr2, $order_id);
-			}
-		}else{
-			$array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
-			if (!isset($array_integrated_address)) {
-				$this->log->add('Monero_Gateway', '[ERROR] Unable get integrated address');
-				// Seems that we can't connect with daemon, then set array_integrated_address, little hack
-				$array_integrated_address["integrated_address"] = $address;
-			}
-			$this->verify_payment($payment_id, $amount_xmr2, $order);
 		}
 		
 		$transactionConfirmed = $this->confirmed;
@@ -384,62 +385,88 @@ class Masari_Gateway extends WC_Payment_Gateway
 		return $sanatized_id;
     }
 
-    public function changeto($amount, $payment_id, $order_id)
+    public function changeto($amount, $fiatCurrency, $payment_id, $order_id)
     {
         global $wpdb;
         $rows_num = $wpdb->get_results("SELECT count(*) as count FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
+        
         if ($rows_num[0]->count > 0) // Checks if the row has already been created or not
         {
             $stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
-
-            $stored_rate_transformed = $stored_rate[0]->rate / 100; //this will turn the stored rate back into a decimaled number
-
-            if (isset($this->discount)) {
-                $sanatized_discount = preg_replace('/[^0-9]/', '', $this->discount);
-                $discount_decimal = $sanatized_discount / 100;
-                $new_amount = $amount / $stored_rate_transformed;
-                $discount = $new_amount * $discount_decimal;
-                $final_amount = $new_amount - $discount;
-                $rounded_amount = round($final_amount, 12);
-            } else {
-                $new_amount = $amount / $stored_rate_transformed;
-                $rounded_amount = round($new_amount, 12); //the moneo wallet can't handle decimals smaller than 0.000000000001
-            }
+			$rate = $stored_rate[0]->rate / 10000; //this will turn the stored rate back into a decimaled number
         } else // If the row has not been created then the live exchange rate will be grabbed and stored
         {
-            $xmr_live_price = $this->retrievePrice();
-            $live_for_storing = $xmr_live_price * 100; //This will remove the decimal so that it can easily be stored as an integer
+            $xmr_live_price = $this->retrievePrice($fiatCurrency);
+            if($xmr_live_price === null)
+            	return null;
+            
+            $live_for_storing = $xmr_live_price * 10000; //This will remove the decimal so that it can easily be stored as an integer
 
             $wpdb->query("INSERT INTO ".$wpdb->prefix."masari_gateway_payments_rate (payment_id,rate,order_id) VALUES ('".$payment_id."',$live_for_storing, $order_id)");
-            if(isset($this->discount))
-            {
-               $new_amount = $amount / $xmr_live_price;
-               $discount = $new_amount * $this->discount / 100;
-               $discounted_price = $new_amount - $discount;
-               $rounded_amount = round($discounted_price, 12);
-            }
-            else
-            {
-               $new_amount = $amount / $xmr_live_price;
-               $rounded_amount = round($new_amount, 12);
-            }
+			$rate = $xmr_live_price;
         }
+	
+		if (isset($this->discount)) {
+			$sanatized_discount = preg_replace('/[^0-9]/', '', $this->discount);
+			$discount_decimal = $sanatized_discount / 100;
+			$new_amount = $amount / $rate;
+			$discount = $new_amount * $discount_decimal;
+			$final_amount = $new_amount - $discount;
+			$rounded_amount = round($final_amount, 12);
+		} else {
+			$new_amount = $amount / $rate;
+			$rounded_amount = round($new_amount, 12); //the moneo wallet can't handle decimals smaller than 0.000000000001
+		}
 
         return $rounded_amount;
     }
 
-
-    // Check if we are forcing SSL on checkout pages
-    // Custom function not required by the Gateway
-
-    public function retrievePrice()
-    {
-        $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/USD');
+    
+    public function retrievePrice($fiatCurrency){
+		if(!(
+			$fiatCurrency === 'AUD' ||
+			$fiatCurrency === 'BRL' ||
+			$fiatCurrency === 'CAD' ||
+			$fiatCurrency === 'CHF' ||
+			$fiatCurrency === 'CLP' ||
+			$fiatCurrency === 'CNY' ||
+			$fiatCurrency === 'CNY' ||
+			$fiatCurrency === 'DKK' ||
+			$fiatCurrency === 'EUR' ||
+			$fiatCurrency === 'GBP' ||
+			$fiatCurrency === 'HKD' ||
+			$fiatCurrency === 'INR' ||
+			$fiatCurrency === 'ISK' ||
+			$fiatCurrency === 'JPY' ||
+			$fiatCurrency === 'KRW' ||
+			$fiatCurrency === 'NZD' ||
+			$fiatCurrency === 'PLN' ||
+			$fiatCurrency === 'RUB' ||
+			$fiatCurrency === 'SEK' ||
+			$fiatCurrency === 'SGD' ||
+			$fiatCurrency === 'THB' ||
+			$fiatCurrency === 'TWD' ||
+			$fiatCurrency === 'USD'
+		)){
+			return null;
+		}
+	
+	
+		$fiatPrice = file_get_contents('https://blockchain.info/tobtc?currency='.$fiatCurrency.'&value=10000');
+		if ($fiatPrice === false) {
+			$this->log->add('masari_gateway', '[ERROR] Unable to get the market price of Masari');
+			return null;
+		}
+		
+		$btcPerFiat = $fiatPrice/10000;
+    	
+        $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/BTC');
         $price = json_decode($msr_price, TRUE);
         if (!isset($price)) {
             $this->log->add('masari_gateway', '[ERROR] Unable to get the market price of Masari');
+            return null;
         }
-        return $price["Last"];
+        return round($price["Last"]/$btcPerFiat, 8);
     }
     
     private function on_verified($payment_id, $amount_atomic_units, $order_id)
