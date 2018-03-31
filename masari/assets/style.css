@@ -1,49 +1,49 @@
-.xmr-payment-container{
+.msr-payment-container{
     background: #f1f1f1;
     border-radius: 5px;
     padding: 15px;
 	font-family: 'Lato', serif;
 }
 
-.xmr-payment-container .header {
+.msr-payment-container .header {
 	border-bottom: 1px solid #e5e5e5;
 	padding-bottom: 15px;
 	font-size: 24px;
 	vertical-align: middle;
 }
-.xmr-payment-container .header img{
+.msr-payment-container .header img{
 	display:inline-block;
 	max-height: 30px;
 	vertical-align: middle;
 }
-.xmr-payment-container .footer{
+.msr-payment-container .footer{
 	border-top: 1px solid #e5e5e5;
 	padding-top: 5px;
 	margin-top: 15px;
 	font-size: 14px;
 	text-align: right;
 }
-.xmr-payment-container .footer a{
+.msr-payment-container .footer a{
 	color:black;
 }
 
-.xmr-payment-container .content .message{
+.msr-payment-container .content .message{
 	text-align: center;
 }
-.xmr-payment-container .content .message.important{
+.msr-payment-container .content .message.important{
 	font-weight: bold;
 }
-.xmr-payment-container .content .message.critical{	color:#DC143C;}
-.xmr-payment-container .content .message.info{	color:#4aa3df;}
-.xmr-payment-container .content .message.success{	color: #4fa73d;}
+.msr-payment-container .content .message.critical{	color:#DC143C;}
+.msr-payment-container .content .message.info{	color:#4aa3df;}
+.msr-payment-container .content .message.success{	color: #4fa73d;}
 
-.xmr-payment-container .content .message i{font-size:40px;	vertical-align: middle;}
+.msr-payment-container .content .message i{font-size:40px;	vertical-align: middle;}
 
-.xmr-payment-container .content .status {
+.msr-payment-container .content .status {
 	padding:15px 0;
 }
 
-.xmr-payment-container .content .data-box{
+.msr-payment-container .content .data-box{
 	border:1px solid #d0d0d0;
 	background: white;
 	margin-bottom: 15px;
@@ -51,9 +51,9 @@
 	-moz-border-radius: 3px;
 	border-radius: 3px;
 }
-.xmr-payment-container .content .data-box label,
-.xmr-payment-container .content .data-box input,
-.xmr-payment-container .content .data-box .copy{
+.msr-payment-container .content .data-box label,
+.msr-payment-container .content .data-box input,
+.msr-payment-container .content .data-box .copy{
 	display:inline-block;
 	height:34px;
 	background: white;
@@ -64,34 +64,34 @@
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
-.xmr-payment-container .content .data-box label {
+.msr-payment-container .content .data-box label {
 	border-right: 1px solid #d0d0d0;
 	width: 100px;
 	padding-left:5px;
 	font-size:16px;
 }
-.xmr-payment-container .content .data-box input{
+.msr-payment-container .content .data-box input{
 	border-style:solid;
 	border:none;
 	width: calc(100% - 150px);
 	padding:0;
 	-webkit-appearance: none;
 }
-.xmr-payment-container .content .data-box .copy{
+.msr-payment-container .content .data-box .copy{
 	border-left:1px solid #d0d0d0;
 	width: 40px;
 	text-align: center;
 	margin: 0;
 	padding: 0;
 }
-.xmr-payment-container .content .data-box .copy i{
+.msr-payment-container .content .data-box .copy i{
 	vertical-align: middle;
 }
 
-.xmr-payment-container .content .qr-code{
+.msr-payment-container .content .qr-code{
 	text-align: center;
 }
-.xmr-payment-container .content .qr-code img{
+.msr-payment-container .content .qr-code img{
 	display: inline-block;
 }
 
@@ -123,7 +123,7 @@
 		transform: rotate(-360deg);
 	}
 }
-.xmr-payment-container .rotating {
+.msr-payment-container .rotating {
 	-webkit-animation: rotating 2s linear infinite;
 	-moz-animation: rotating 2s linear infinite;
 	-ms-animation: rotating 2s linear infinite;
