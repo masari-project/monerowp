@@ -2,7 +2,7 @@
 
 /* 
  * Main Gateway of Monero using a daemon online 
- * Authors: Serhack and cryptochangements
+ * Authors: Serhack, cryptochangements and gnock
  * Modified to work with Masari
  */
 
@@ -14,7 +14,26 @@ class Masari_Gateway extends WC_Payment_Gateway
     private $confirmed = false;
     private $monero_daemon;
     private $non_rpc = false;
-	private $zero_cofirm = false;
+	
+	private $version;
+	/** @var WC_Logger  */
+	private $log;
+	/** @var string|null  */
+	private $host;
+	/** @var string|null  */
+	private $port;
+	/** @var string|null  */
+	private $address;
+	/** @var string|null  */
+	private $viewKey;
+	/** @var string|null  */
+	private $accept_zero_conf;
+	/** @var string|null  */
+	private $use_viewKey;
+	/** @var string|null  */
+	private $use_rpc;
+	/** @var bool  */
+	private $zero_confirm;
 
     function __construct()
     {
@@ -72,10 +91,22 @@ class Masari_Gateway extends WC_Payment_Gateway
 		
         $this->monero_daemon = new Monero_Library($this->host, $this->port);
     }
+    
+    public static function install(){
+		global $wpdb;
+		// This will create a table named whatever the payment id is inside the database "WordPress"
+		$create_table = "CREATE TABLE IF NOT EXISTS ".$wpdb->prefix."masari_gateway_payments_rate(
+									rate INT NOT NULL,
+									payment_id VARCHAR(64) PRIMARY KEY,
+									payed boolean NOT NULL DEFAULT 0,
+									order_id INT NOT NULL
+									)";
+		$wpdb->query($create_table);
+	}
 
-    public function get_icon()
-    {
-        return apply_filters('woocommerce_gateway_icon', "<img src='http://cdn.monerointegrations.com/logomonero.png' />");
+    public function get_icon(){
+		$pluginDirectory = plugin_dir_url(__FILE__).'../';
+		return apply_filters('woocommerce_gateway_icon', '<img src="'.$pluginDirectory.'assets/masari_icon_small.png" />');
     }
 
     public function init_form_fields()
@@ -246,13 +277,12 @@ class Masari_Gateway extends WC_Payment_Gateway
 
     }
 
-
     // Validate fields
 
     public function check_monero()
     {
-        if (strlen($monero_address) == 95) {
-            $masari_address = $this->settings['masari_address'];
+        $masari_address = $this->settings['masari_address'];
+        if (strlen($masari_address) == 95) {
             return true;
         }
         return false;
@@ -270,19 +300,15 @@ class Masari_Gateway extends WC_Payment_Gateway
     }
     public function check_checkedBoxes()
     {
-        if($this->use_viewKey == 'yes')
-        {
-            if($this->use_rpc == 'yes')
-            {
+        if($this->use_viewKey == 'yes'){
+            if($this->use_rpc == 'yes'){
                 return true;
             }
         }
-        else
-            return false;
+        return false;
     }
     
-    public function is_virtual_in_cart($order_id)
-    {
+    public function is_virtual_in_cart($order_id){
         $order = wc_get_order( $order_id );
         $items = $order->get_items();
         
@@ -298,175 +324,45 @@ class Masari_Gateway extends WC_Payment_Gateway
     
     public function instruction($order_id)
     {
-        if($this->non_rpc)
-        {
-            echo "<noscript><h1>You must enable javascript in order to confirm your order</h1></noscript>";
-            $order = wc_get_order($order_id);
-            $amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
-            $payment_id = $this->set_paymentid_cookie(32);
-            $currency = $order->get_currency();
-            $amount_xmr2 = $this->changeto( $amount, $payment_id);
-            $address = $this->address;
-            
-            $order->update_meta_data( "Payment ID", $payment_id);
-            $order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
-            $order->save();
-            
-            if (!isset($address)) {
-                // If there isn't address (merchant missed that field!), $address will be the Monero address for donating :)
-                $address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
-            }
-            $uri = "masari:$address?tx_payment_id=$payment_id";
-            
-            if($this->zero_confirm){
-                $this->verify_zero_conf($payment_id, $amount_xmr2, $order_id);
-            }
-            else{
-                $this->verify_non_rpc($payment_id, $amount_xmr2, $order_id);
-            }
-            if($this->confirmed == false)
-            {
-                echo "<h4><font color=DC143C> We are waiting for your transaction to be confirmed </font></h4>";
-            }
-            if($this->confirmed)
-            {
-                echo "<h4><font color=006400> Your transaction has been successfully confirmed! </font></h4>";
-            }
-            
-            echo "
-            <head>
-            <p>*don't forget to include the payment ID in your transaction</p>
-            <!--Import Google Icon Font-->
-            <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
-            <link href='https://fonts.googleapis.com/css?family=Montserrat:400,800' rel='stylesheet'>
-            <link href='/style.css' rel='stylesheet' type='text/css'>
-            <!--Let browser know website is optimized for mobile-->
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
-                </head>
-                <body>
-                <!-- page container  -->
-                <div class='page-container'>
-                <!-- monero container payment box -->
-                <div class='container-xmr-payment'>
-                <!-- header -->
-                <div class='header-xmr-payment'>
-                
-                <span class='xmr-payment-text-header'><h2>MASARI PAYMENT</h2></span>
-                </div>
-                <!-- end header -->
-                <!-- xmr content box -->
-                <div class='content-xmr-payment'>
-                <div class='xmr-amount-send'>
-                <span class='xmr-label'>Send:</span>
-                <div class='xmr-amount-box'>".$amount_xmr2."</div>
-                <span class='xmr-label'>Payment ID:</span>
-                <div class='xmr-integrated-address-box'>".$payment_id."</div>
-                </div>
-                <div class='xmr-address'>
-                <span class='xmr-label'>To this address:</span>
-                <div class='xmr-address-box'>".$address."</div>
-                </div>
-                <div class='xmr-qr-code'>
-                <span class='xmr-label'>Or scan QR:</span>
-                <div class='xmr-qr-code-box'><img src='https://api.qrserver.com/v1/create-qr-code/? size=200x200&data=".$uri."' /></div>
-                </div>
-                <div class='clear'></div>
-                </div>
-                <!-- end content box -->
-                <!-- footer xmr payment -->
-                <div class='footer-xmr-payment'>
-                <a href='https://getmasari.org' target='_blank'>Help</a> | <a href='https://getmasari.org' target='_blank'>About Masari</a>
-                </div>
-                <!-- end footer xmr payment -->
-                </div>
-                <!-- end monero container payment box -->
-                </div>
-                <!-- end page container  -->
-                </body>
-                ";
-                
-                echo "
-                <script type='text/javascript'>setTimeout(function () { location.reload(true); }, $this->reloadTime);</script>";
-        }
-        else
-        {
-            $order = wc_get_order($order_id);
-            $amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
-            $payment_id = $this->set_paymentid_cookie(8);
-            $currency = $order->get_currency();
-            $amount_xmr2 = $this->changeto($amount, $payment_id);
-            
-            $order->update_meta_data( "Payment ID", $payment_id);
-            $order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
-            $order->save();
-
-            $uri = "masari:$address?tx_payment_id=$payment_id";
-            $array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
-            if (!isset($array_integrated_address)) {
-                $this->log->add('masari_gateway', '[ERROR] Unable get integrated address');
-                // Seems that we can't connect with daemon, then set array_integrated_address, little hack
-                $array_integrated_address["integrated_address"] = $address;
-            }
-            $message = $this->verify_payment($payment_id, $amount_xmr2, $order);
-            if ($this->confirmed) {
-                $color = "006400";
-            } else {
-                $color = "DC143C";
-            }
-            echo "<h4><font color=$color>" . $message . "</font></h4>";
-        
-            echo "
-            <head>
-            <!--Import Google Icon Font-->
-            <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
-            <link href='https://fonts.googleapis.com/css?family=Montserrat:400,800' rel='stylesheet'>
-            <link href='/style.css' rel='stylesheet' type='text/css'>
-            <!--Let browser know website is optimized for mobile-->
-                <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
-                </head>
-                <body>
-                <!-- page container  -->
-                <div class='page-container'>
-                <!-- monero container payment box -->
-                <div class='container-xmr-payment'>
-                <!-- header -->
-                <div class='header-xmr-payment'>
-                <span class='logo-xmr'><img src='http://cdn.monerointegrations.com/logomonero.png' /></span>
-                <span class='xmr-payment-text-header'><h2>MONERO PAYMENT</h2></span>
-                </div>
-                <!-- end header -->
-                <!-- xmr content box -->
-                <div class='content-xmr-payment'>
-                <div class='xmr-amount-send'>
-                <span class='xmr-label'>Send:</span>
-                <div class='xmr-amount-box'>".$amount_xmr2."</div>
-                </div>
-                <div class='xmr-address'>
-                <span class='xmr-label'>To this address:</span>
-                <div class='xmr-address-box'>".$array_integrated_address['integrated_address']."</div>
-                </div>
-                <div class='xmr-qr-code'>
-                <span class='xmr-label'>Or scan QR:</span>
-                <div class='xmr-qr-code-box'><img src='https://api.qrserver.com/v1/create-qr-code/? size=200x200&data=".$uri."' /></div>
-                </div>
-                <div class='clear'></div>
-                </div>
-                <!-- end content box -->
-                <!-- footer xmr payment -->
-                <div class='footer-xmr-payment'>
-                <a href='https://getmonero.org' target='_blank'>Help</a> | <a href='https://getmonero.org' target='_blank'>About Monero</a>
-                </div>
-                <!-- end footer xmr payment -->
-                </div>
-                <!-- end monero container payment box -->
-                </div>
-                <!-- end page container  -->
-                </body>
-            ";
-
-            echo "
-          <script type='text/javascript'>setTimeout(function () { location.reload(true); }, $this->reloadTime);</script>";
-        }
+    	$pluginDirectory = plugin_dir_url(__FILE__).'../';
+		$order = wc_get_order($order_id);
+		$amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
+		$payment_id = $this->set_paymentid_cookie(32);
+		$currency = $order->get_currency();
+		$amount_xmr2 = $this->changeto( $amount, $payment_id, $order_id);
+		$address = $this->address;
+		
+		$order->update_meta_data( "Payment ID", $payment_id);
+		$order->update_meta_data( "Amount requested (MSR)", $amount_xmr2);
+		$order->save();
+	
+		$qrUri = "masari:$address?tx_payment_id=$payment_id";
+		
+		if($this->non_rpc){
+			if (!isset($address)) {
+				// If there isn't address (merchant missed that field!), $address will be the Monero address for donating :)
+				$address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
+			}
+			
+			if($this->zero_confirm){
+				$this->verify_zero_conf($payment_id, $amount_xmr2, $order_id);
+			}
+			else{
+				$this->verify_non_rpc($payment_id, $amount_xmr2, $order_id);
+			}
+		}else{
+			$array_integrated_address = $this->monero_daemon->make_integrated_address($payment_id);
+			if (!isset($array_integrated_address)) {
+				$this->log->add('Monero_Gateway', '[ERROR] Unable get integrated address');
+				// Seems that we can't connect with daemon, then set array_integrated_address, little hack
+				$array_integrated_address["integrated_address"] = $address;
+			}
+			$this->verify_payment($payment_id, $amount_xmr2, $order);
+		}
+		
+		$transactionConfirmed = $this->confirmed;
+		$pluginIdentifier = 'masari_gateway';
+		include 'html/paymentBox.php';
     }
 
     private function set_paymentid_cookie($size)
@@ -485,21 +381,16 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         // Limit payment id to alphanumeric characters
         $sanatized_id = preg_replace("/[^a-zA-Z0-9]+/", "", $payment_id);
-	return $sanatized_id;
+		return $sanatized_id;
     }
 
-    public function changeto($amount, $payment_id)
+    public function changeto($amount, $payment_id, $order_id)
     {
         global $wpdb;
-        // This will create a table named whatever the payment id is inside the database "WordPress"
-        $create_table = "CREATE TABLE IF NOT EXISTS $payment_id (
-									rate INT
-									)";
-        $wpdb->query($create_table);
-        $rows_num = $wpdb->get_results("SELECT count(*) as count FROM $payment_id");
+        $rows_num = $wpdb->get_results("SELECT count(*) as count FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
         if ($rows_num[0]->count > 0) // Checks if the row has already been created or not
         {
-            $stored_rate = $wpdb->get_results("SELECT rate FROM $payment_id");
+            $stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
 
             $stored_rate_transformed = $stored_rate[0]->rate / 100; //this will turn the stored rate back into a decimaled number
 
@@ -516,10 +407,10 @@ class Masari_Gateway extends WC_Payment_Gateway
             }
         } else // If the row has not been created then the live exchange rate will be grabbed and stored
         {
-            $xmr_live_price = $this->retriveprice();
+            $xmr_live_price = $this->retrievePrice();
             $live_for_storing = $xmr_live_price * 100; //This will remove the decimal so that it can easily be stored as an integer
 
-            $wpdb->query("INSERT INTO $payment_id (rate) VALUES ($live_for_storing)");
+            $wpdb->query("INSERT INTO ".$wpdb->prefix."masari_gateway_payments_rate (payment_id,rate,order_id) VALUES ('".$payment_id."',$live_for_storing, $order_id)");
             if(isset($this->discount))
             {
                $new_amount = $amount / $xmr_live_price;
@@ -541,7 +432,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     // Check if we are forcing SSL on checkout pages
     // Custom function not required by the Gateway
 
-    public function retriveprice()
+    public function retrievePrice()
     {
         $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/USD');
         $price = json_decode($msr_price, TRUE);
@@ -553,7 +444,6 @@ class Masari_Gateway extends WC_Payment_Gateway
     
     private function on_verified($payment_id, $amount_atomic_units, $order_id)
     {
-        $message = "Payment has been received and confirmed. Thanks!";
         $this->log->add('masari_gateway', '[SUCCESS] Payment has been recorded. Congratulations!');
         $this->confirmed = true;
         $order = wc_get_order($order_id);
@@ -564,11 +454,11 @@ class Masari_Gateway extends WC_Payment_Gateway
         else{
             $order->update_status('processing', __('Payment has been received.', 'masari_gateway')); // Show payment id used for order
         }
+        
         global $wpdb;
-        $wpdb->query("DROP TABLE $payment_id"); // Drop the table from database after payment has been confirmed as it is no longer needed
+		$wpdb->query("UPDATE ".$wpdb->prefix."masari_gateway_payments_rate SET payed=true WHERE payment_id='".$payment_id."'");
                          
         $this->reloadTime = 3000000000000; // Greatly increase the reload time as it is no longer needed
-        return $message;
     }
     
     public function verify_payment($payment_id, $amount, $order_id)
@@ -577,13 +467,12 @@ class Masari_Gateway extends WC_Payment_Gateway
          * function for verifying payments
          * Check if a payment has been made with this payment id then notify the merchant
          */
-        $message = "We are waiting for your payment to be confirmed";
         $amount_atomic_units = $amount * 1000000000000;
         $get_payments_method = $this->monero_daemon->get_payments($payment_id);
         if (isset($get_payments_method["payments"][0]["amount"])) {
             if ($get_payments_method["payments"][0]["amount"] >= $amount_atomic_units)
             {
-                $message = $this->on_verified($payment_id, $amount_atomic_units, $order_id);
+                $this->on_verified($payment_id, $amount_atomic_units, $order_id);
             }
             if ($get_payments_method["payments"][0]["amount"] < $amount_atomic_units)
             {
@@ -598,11 +487,10 @@ class Masari_Gateway extends WC_Payment_Gateway
                 }
                 if($totalPayed >= $amount_atomic_units)
                 {
-                    $message = $this->on_verified($payment_id, $amount_atomic_units, $order_id);
+                    $this->on_verified($payment_id, $amount_atomic_units, $order_id);
                 }
             }
         }
-        return $message;
     }
     public function last_block_seen($height) // sometimes 2 blocks are mined within a few seconds of eacher. Make sure we don't miss one
     {
@@ -628,8 +516,8 @@ class Masari_Gateway extends WC_Payment_Gateway
         $txs_from_block = $tools->get_txs_from_block($bc_height);
         $tx_count = count($txs_from_block) - 1; // The tx at index 0 is a coinbase tx so it can be ignored
         
-        $output_found;
-        $block_index;
+        $output_found = null;
+        $block_index = null;
         
         if($block_difference != 0)
         {
@@ -699,7 +587,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         $txs_from_mempool = $tools->get_mempool_txs();;
         $tx_count = count($txs_from_mempool['data']['txs']);
         $i = 0;
-        $output_found;
+        $output_found = null;
         
         while($i <= $tx_count)
         {
@@ -742,12 +630,11 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         $host = $this->settings['daemon_host'];
         $port = $this->settings['daemon_port'];
-        $monero_library = new Monero($host, $port);
-        if ($monero_library->works() == true) {
+        $masariLibrary = new Monero_Library($host, $port);
+        if ($masariLibrary->works() == true) {
             echo "<div class=\"notice notice-success is-dismissible\"><p>Everything works! Congratulations and welcome to Masari. <button type=\"button\" class=\"notice-dismiss\">
 						<span class=\"screen-reader-text\">Dismiss this notice.</span>
 						</button></p></div>";
-
         } else {
             $this->log->add('masari_gateway', '[ERROR] Plugin can not reach wallet rpc.');
             echo "<div class=\" notice notice-error\"><p>Error with connection of daemon, see documentation!</p></div>";

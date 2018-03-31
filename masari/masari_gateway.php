@@ -17,7 +17,7 @@ add_action('plugins_loaded', 'masari_init', 0);
 
 function masari_gateway($methods)
 {
-	$methods[] = 'Monero_Gateway';
+	$methods[] = 'Masari_Gateway';
 	return $methods;
 }
 
@@ -37,6 +37,13 @@ function masari_add_my_currency_symbol($currency_symbol, $currency)
 	return $currency_symbol;
 }
 
+
+function masari_scripts(){
+	wp_enqueue_style('materials_icons', 'https://fonts.googleapis.com/icon?family=Material+Icons');
+	wp_enqueue_style('montserrat_font', 'http://fonts.googleapis.com/css?family=Lato:400,700');
+	wp_enqueue_style('masari_gateway-style',  plugin_dir_url( __FILE__ ).'assets/style.css');
+}
+
 function masari_init()
 {
     /* If the class doesn't exist (== WooCommerce isn't installed), return NULL */
@@ -52,6 +59,9 @@ function masari_init()
 	
 	// Lets add it too WooCommerce
 	add_filter('woocommerce_payment_gateways', 'masari_gateway');
+	
+	//registering css/js
+	add_action( 'wp_enqueue_scripts', 'masari_scripts' );
 }
 
 /*
@@ -77,10 +87,16 @@ function monero_create_menu()
         'manage_options',
         'admin.php?page=wc-settings&tab=checkout&section=masari_gateway',
         '',
-        plugins_url('masari/assets/monero_icon.png'),
+        plugins_url('masari/assets/masari_icon_small.png'),
         56 // Position on menu, woocommerce has 55.5, products has 55.6
 
     );
 }
 
 
+//register for installation
+function masari_plugin_activate() {
+	include_once('include/masari_payments.php');
+	Masari_Gateway::install();
+}
+register_activation_hook( __FILE__, 'masari_plugin_activate' );
