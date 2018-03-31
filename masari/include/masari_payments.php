@@ -340,15 +340,16 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$order->update_meta_data( "Payment ID", $payment_id);
 		$order->update_meta_data( "Amount requested (MSR)", $amount_msr2);
 		$order->save();
+		
+		$displayedPaymentAddress = null;
+		$displayedPaymentId = null;
 	
 		if($amount_msr2 !== null){
 			$qrUri = "masari:$address?tx_payment_id=$payment_id";
 			
 			if($this->non_rpc){
-				if(!isset($address)){
-					// If there isn't address (merchant missed that field!), $address will be the Masari address for donating :)
-					$address = "44AFFq5kSiGBoZ4NMDwYtN18obc8AemS33DBLWs3H7otXft3XjrpDtQGv7SqSsaBYBb98uNbr2VBBEt7f2wfn3RVGQBEP3A";
-				}
+				$displayedPaymentAddress = $address;
+				$displayedPaymentId = $payment_id;
 				
 				if($this->zero_confirm){
 					$this->verify_zero_conf($payment_id, $amount_msr2, $order_id);
@@ -361,6 +362,12 @@ class Masari_Gateway extends WC_Payment_Gateway
 					$this->log->add('Masari_Gateway', '[ERROR] Unable get integrated address');
 					// Seems that we can't connect with daemon, then set array_integrated_address, little hack
 					$array_integrated_address["integrated_address"] = $address;
+					
+					$displayedPaymentAddress = $address;
+					$displayedPaymentId = $payment_id;
+				}else{
+					$displayedPaymentAddress = $array_integrated_address["integrated_address"];
+					$displayedPaymentId = null;
 				}
 				$this->verify_payment($payment_id, $amount_msr2, $order);
 			}
