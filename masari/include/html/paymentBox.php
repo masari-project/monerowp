@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="xmr-payment-container">
+<div class="msr-payment-container">
 	<div class="header">
 		<img src="<?= $pluginDirectory?>assets/masari_icon.png" alt="Masari" />
 		<?php _e('Masari Payment', $pluginIdentifier) ?>
@@ -35,10 +35,10 @@
 			<?php _e('Please send your MSR with those informations', $pluginIdentifier) ?>
 		</div>
 	
-		<div class="xmr-amount-send">
+		<div class="msr-amount-send">
 			<div class="data-box" >
 				<label><?php _e('Amount', $pluginIdentifier) ?></label>
-				<input id="msr_amount" type="text" disabled="disabled" class="value" value="<?= $amount_xmr2 ?>">
+				<input id="msr_amount" type="text" disabled="disabled" class="value" value="<?= $amount_msr2 ?>">
 				<button class="copy" onclick="setTextInClipboard('msr_amount')" title="<?php _e('Copy', $pluginIdentifier) ?>"><i class="material-icons" >content_copy</i></button>
 			</div>
 			<div class="data-box" >

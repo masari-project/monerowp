@@ -10,7 +10,7 @@
  * http://implix.com
  * Modified to work with monero-rpc wallet by Serhack and cryptochangements
  */
-class Monero_Library
+class Masari_Library
 {
     protected $url = null, $is_debug = false, $parameters_structure = 'array';
     protected $curl_options = array(
@@ -220,7 +220,7 @@ class Monero_Library
     }
 
     /* 
-     * The following functions can all be called to interact with the monero rpc wallet
+     * The following functions can all be called to interact with the masari rpc wallet
      * They will majority of them will return the result as an array
      * Example: $daemon->address(); where $daemon is an instance of this class, will return the wallet address as string within an array
      */
@@ -281,7 +281,7 @@ class Monero_Library
 
     public function make_uri($address, $amount, $recipient_name = null, $description = null)
     {
-        // If I pass 1, it will be 0.0000001 xmr. Then
+        // If I pass 1, it will be 0.0000001 msr. Then
         $new_amount = $amount * 100000000;
 
         $uri_params = array('address' => $address, 'amount' => $new_amount, 'payment_id' => '', 'recipient_name' => $recipient_name, 'tx_description' => $description);
