@@ -19,7 +19,11 @@
 		<?php _e('Masari Payment', $pluginIdentifier) ?>
 	</div>
 	<div class="content">
-	<?php if(!$transactionConfirmed): ?>
+	<?php if($amount_xmr2===null): ?>
+		<div class="status message important critical" >
+			<?php _e('Your transaction cannot be processed currently. If you are the shop owner, please check your configuration', $pluginIdentifier) ?>
+		</div>
+	<?php elseif(!$transactionConfirmed): ?>
 
 		<noscript>
 			<div class="status message important critical">
