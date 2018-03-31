@@ -435,6 +435,9 @@ class Masari_Gateway extends WC_Payment_Gateway
 
     
     public function retrievePrice($fiatCurrency){
+		if($fiatCurrency === 'MSR')
+			return 1;
+   
 		if(!(
 			$fiatCurrency === 'AUD' ||
 			$fiatCurrency === 'BRL' ||
