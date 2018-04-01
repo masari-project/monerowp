@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="msr-payment-container">
+<div class="msr-payment-container <?php echo $displayedDarkTheme ? 'dark' : ''; ?>">
 	<div class="header">
 		<img src="<?= $pluginDirectory?>assets/masari_icon.png" alt="Masari" />
 		<?php _e('Masari Payment', $pluginIdentifier) ?>
