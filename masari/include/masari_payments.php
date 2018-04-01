@@ -535,7 +535,7 @@ class Masari_Gateway extends WC_Payment_Gateway
                     $tx_height = $get_payments_method["payments"][0]["block_height"];
                     $bc_height = $this->msr_tools->get_last_block_height();
                     $this->confirmations = ($bc_height - $tx_height) + 1;
-                    if($this->confirmations == $this->confirmations_wait)
+                    if($this->confirmations >= $this->confirmations_wait)
                     {
                        $this->on_verified($payment_id, $amount_atomic_units, $order_id);
                     }
