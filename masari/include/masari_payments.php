@@ -14,6 +14,8 @@ class Masari_Gateway extends WC_Payment_Gateway
     private $confirmed = false;
     private $masari_daemon;
     private $non_rpc = false;
+    private $confirmations = 0;
+    private $msr_tools;
 	
 	private $version;
 	/** @var WC_Logger  */
@@ -90,6 +92,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         }
 		
         $this->masari_daemon = new Masari_Library($this->host, $this->port);
+        $this->msr_tools = new NodeTools();
     }
     
     public static function install(){
@@ -529,6 +532,9 @@ class Masari_Gateway extends WC_Payment_Gateway
                 }
                 if($totalPayed >= $amount_atomic_units)
                 {
+                    $tx_height = $get_payments_method["payments"][0]["block_height"];
+                    $bc_height = $this->msr_tools->get_last_block_height();
+                    $this->confirmations = ($bc_height - $tx_height) + 1;
                     $this->on_verified($payment_id, $amount_atomic_units, $order_id);
                 }
             }
@@ -550,12 +556,11 @@ class Masari_Gateway extends WC_Payment_Gateway
     }
     public function verify_non_rpc($payment_id, $amount, $order_id)
     {
-        $tools = new NodeTools();
-        $bc_height = $tools->get_last_block_height();
+        $bc_height = $this->msr_tools->get_last_block_height();
 
         $block_difference = $this->last_block_seen($bc_height);
         
-        $txs_from_block = $tools->get_txs_from_block($bc_height);
+        $txs_from_block = $this->msr_tools->get_txs_from_block($bc_height);
         $tx_count = count($txs_from_block) - 1; // The tx at index 0 is a coinbase tx so it can be ignored
         
         $output_found = null;
@@ -567,7 +572,7 @@ class Masari_Gateway extends WC_Payment_Gateway
                 $this->log->add('[WARNING] Block difference is greater or equal to 2');
             }
             
-            $txs_from_block_2 = $tools->get_txs_from_block($bc_height - 1);
+            $txs_from_block_2 = $this->msr_tools->get_txs_from_block($bc_height - 1);
             $tx_count_2 = count($txs_from_block_2) - 1;
             
             $i = 1;
@@ -576,7 +581,7 @@ class Masari_Gateway extends WC_Payment_Gateway
                 $tx_hash = $txs_from_block_2[$i]['tx_hash'];
                 if(strlen($txs_from_block_2[$i]['payment_id']) != 0)
                 {
-                    $result = $tools->check_tx($tx_hash, $this->address, $this->viewKey);
+                    $result = $this->msr_tools->check_tx($tx_hash, $this->address, $this->viewKey);
                     if($result)
                     {
                         $output_found = $result;
@@ -594,7 +599,7 @@ class Masari_Gateway extends WC_Payment_Gateway
             $tx_hash = $txs_from_block[$i]['tx_hash'];
             if(strlen($txs_from_block[$i]['payment_id']) != 0)
             {
-                $result = $tools->check_tx($tx_hash, $this->address, $this->viewKey);
+                $result = $this->msr_tools->check_tx($tx_hash, $this->address, $this->viewKey);
                 if($result)
                 {
                     $output_found = $result;
@@ -625,8 +630,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     
     public function verify_zero_conf($payment_id, $amount, $order_id)
     {
-        $tools = new NodeTools();
-        $txs_from_mempool = $tools->get_mempool_txs();;
+        $txs_from_mempool = $this->msr_tools->get_mempool_txs();;
         $tx_count = count($txs_from_mempool['data']['txs']);
         $i = 0;
         $output_found = null;
@@ -636,7 +640,7 @@ class Masari_Gateway extends WC_Payment_Gateway
             $tx_hash = $txs_from_mempool['data']['txs'][$i]['tx_hash'];
             if(strlen($txs_from_mempool['data']['txs'][$i]['payment_id']) != 0)
             {
-                $result = $tools->check_tx($tx_hash, $this->address, $this->viewKey);
+                $result = $this->msr_tools->check_tx($tx_hash, $this->address, $this->viewKey);
                 if($result)
                 {
                     $output_found = $result;
