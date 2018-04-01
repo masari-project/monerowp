@@ -16,6 +16,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     private $non_rpc = false;
     private $confirmations = 0;
     private $msr_tools;
+    private $confirmations_wait;
 	
 	private $version;
 	/** @var WC_Logger  */
@@ -56,7 +57,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         $this->address = $this->get_option('masari_address');
         $this->viewKey = $this->get_option('viewKey');
         $this->discount = $this->get_option('discount');
-        $this->accept_zero_conf = $this->get_option('zero_conf');
+        $this->confirmations_wait = $this->get_option('confs');
         
         $this->use_viewKey = $this->get_option('use_viewKey');
         $this->use_rpc = $this->get_option('use_rpc');
@@ -69,7 +70,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         {
             $this->non_rpc = false;
         }
-        if($this->accept_zero_conf == 'yes')
+        if($this->confirmations_wait == 0)
         {
             $this->zero_confirm = true;
         }
@@ -189,12 +190,11 @@ class Masari_Gateway extends WC_Payment_Gateway
                 'description' => __('Check this box if you are using testnet', 'masari_gateway'),
                 'default' => 'no'
             ),
-            'zero_conf' => array(
-                'title' => __(' Accept 0 conf txs', 'masari_gateway'),
-                'label' => __(' Accept 0-confirmation transactions ', 'masari_gateway'),
-                'type' => 'checkbox',
-                'description' => __('This is faster but less secure', 'masari_gateway'),
-                'default' => 'no'
+            'confs' => array(
+                'title' => __(' Confirmations to wait for', 'masari_gateway'),
+                'type' => 'number',
+                'description' => __('For small amounts transactions you can use zero. Three transactions is generally regarded as safe', 'masari_gateway'),
+                'default' => '1'
             ),
             'onion_service' => array(
                 'title' => __(' SSL warnings ', 'masari_gateway'),
@@ -535,7 +535,10 @@ class Masari_Gateway extends WC_Payment_Gateway
                     $tx_height = $get_payments_method["payments"][0]["block_height"];
                     $bc_height = $this->msr_tools->get_last_block_height();
                     $this->confirmations = ($bc_height - $tx_height) + 1;
-                    $this->on_verified($payment_id, $amount_atomic_units, $order_id);
+                    if($this->confirmations == $this->confirmations_wait)
+                    {
+                       $this->on_verified($payment_id, $amount_atomic_units, $order_id);
+                    }
                 }
             }
         }
