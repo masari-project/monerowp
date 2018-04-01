@@ -318,6 +318,13 @@ class Masari_Library
         $get_bulk_payments = $this->_run('get_bulk_payments', $get_bulk_payments_parameters);
         return $get_bulk_payments;
     }
+
+    public function get_transfers_in_mempool()
+    {
+        $get_transfers_paramaters = array("pool" => true);
+        $response = $this->_run('get_transfers', $get_transfers_paramaters);
+	return $response["pool"];
+    }
 }
     
 class NodeTools
