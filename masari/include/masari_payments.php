@@ -37,6 +37,10 @@ class Masari_Gateway extends WC_Payment_Gateway
 	private $use_rpc;
 	/** @var bool  */
 	private $zero_confirm;
+	/** @var string  */
+	private $darkTheme;
+	
+	
 
     function __construct()
     {
@@ -52,6 +56,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         $this->log = new WC_Logger();
 
         $this->init_form_fields();
+		$this->darkTheme = $this->get_option('darkTheme');
         $this->host = $this->get_option('daemon_host');
         $this->port = $this->get_option('daemon_port');
         $this->address = $this->get_option('masari_address');
@@ -134,8 +139,14 @@ class Masari_Gateway extends WC_Payment_Gateway
                 'type' => 'textarea',
                 'desc_tip' => __('Payment description the customer will see during the checkout process.', 'masari_gateway'),
                 'default' => __('Pay securely using MSR.', 'masari_gateway')
-
             ),
+			'darkTheme' => array(
+				'title' => __('Dark theme', 'masari_gateway'),
+				'label' => __('Enable the dark theme for the Masari payment box', 'masari_gateway'),
+				'type' => 'checkbox',
+				'default' => 'no'
+			),
+            
             'use_viewKey' => array(
                 'title' => __('Use ViewKey', 'masari_gateway'),
                 'label' => __(' Verify Transaction with ViewKey ', 'masari_gateway'),
@@ -346,6 +357,9 @@ class Masari_Gateway extends WC_Payment_Gateway
 		
 		$displayedPaymentAddress = null;
 		$displayedPaymentId = null;
+		$displayedDarkTheme = $this->darkTheme === 'yes';
+		$displayedCurrentConfirmation = $this->confirmations;
+		$displayedMaxConfirmation = $this->confirmations_wait;
 	
 		if($amount_msr2 !== null){
 			$qrUri = "masari:$address?tx_payment_id=$payment_id";
