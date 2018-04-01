@@ -358,6 +358,8 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$displayedPaymentAddress = null;
 		$displayedPaymentId = null;
 		$displayedDarkTheme = $this->darkTheme === 'yes';
+		$displayedCurrentConfirmation = $this->confirmations;
+		$displayedMaxConfirmation = $this->confirmations_wait;
 	
 		if($amount_msr2 !== null){
 			$qrUri = "masari:$address?tx_payment_id=$payment_id";

@@ -23,6 +23,15 @@
 		<div class="status message important critical" >
 			<?php _e('Your transaction cannot be processed currently. If you are the shop owner, please check your configuration', $pluginIdentifier) ?>
 		</div>
+	<?php elseif($displayedCurrentConfirmation > 0 && !$transactionConfirmed): ?>
+		<div class="status message important info">
+			<i class="material-icons rotating" >replay</i>
+			<?php _e('Your payment is being processed', $pluginIdentifier) ?> (<?= $displayedCurrentConfirmation ?>/<?= $displayedMaxConfirmation ?> <?php _e('confirmations', $pluginIdentifier) ?>)
+		</div>
+		<div class="meter">
+			<span class="progress" style="width: <?php echo $displayedCurrentConfirmation/$displayedMaxConfirmation*100; ?>%"></span>
+			<span class="text" >(<?= $displayedCurrentConfirmation ?>/<?= $displayedMaxConfirmation ?>) <?php _e('confirmations', $pluginIdentifier) ?></span>
+		</div>
 	<?php elseif(!$transactionConfirmed): ?>
 
 		<noscript>
