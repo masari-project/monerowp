@@ -526,6 +526,18 @@ class Masari_Gateway extends WC_Payment_Gateway
          * function for verifying payments
          * Check if a payment has been made with this payment id then notify the merchant
          */
+        
+        $pool_txs = $this->masari_daemon->get_transfers_in_mempool();
+        $mempool_tx_found = false;
+        $i = 1;
+        while($i <= count($pool_txs))
+        {
+           if($pool_txs[$i-1]["payment_id"] == $payment_id)
+           {
+               $mempool_tx_found = true;
+           }
+           $i++;
+        }
         $amount_atomic_units = $amount * 1000000000000;
         $get_payments_method = $this->masari_daemon->get_payments($payment_id);
         if (isset($get_payments_method["payments"][0]["amount"])) {
