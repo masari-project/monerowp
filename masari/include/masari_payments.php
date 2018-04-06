@@ -530,15 +530,27 @@ class Masari_Gateway extends WC_Payment_Gateway
         $pool_txs = $this->masari_daemon->get_transfers_in_mempool();
         $mempool_tx_found = false;
         $i = 1;
+        $correct_tx;
         while($i <= count($pool_txs))
         {
            if($pool_txs[$i-1]["payment_id"] == $payment_id)
            {
                $mempool_tx_found = true;
+               $tx_index = $i - 1;
            }
            $i++;
         }
+        
         $amount_atomic_units = $amount * 1000000000000;
+        
+        if($this->confirmations_wait == 0)
+        {
+            if($pool_txs[$tx_index]["amount"] >= 1)
+            {
+               $this->on_verified($payment_id, $amount_atomic_units, $order_id);
+            }
+        }
+        
         $get_payments_method = $this->masari_daemon->get_payments($payment_id);
         if (isset($get_payments_method["payments"][0]["amount"])) {
             if ($get_payments_method["payments"][0]["amount"] >= $amount_atomic_units)
