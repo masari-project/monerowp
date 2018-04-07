@@ -545,7 +545,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         
         if($this->confirmations_wait == 0)
         {
-            if($pool_txs[$tx_index]["amount"] >= 1)
+            if($pool_txs[$tx_index]["amount"] >= $amount_atomic_units)
             {
                $this->on_verified($payment_id, $amount_atomic_units, $order_id);
             }
