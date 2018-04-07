@@ -39,6 +39,8 @@ class Masari_Gateway extends WC_Payment_Gateway
 	private $zero_confirm;
 	/** @var string  */
 	private $darkTheme;
+	/** @var bool  */
+	private $mempool_tx_found = false;
 	
 	
 
@@ -358,8 +360,6 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$displayedPaymentAddress = null;
 		$displayedPaymentId = null;
 		$displayedDarkTheme = $this->darkTheme === 'yes';
-		$displayedCurrentConfirmation = $this->confirmations;
-		$displayedMaxConfirmation = $this->confirmations_wait;
 	
 		if($amount_msr2 !== null){
 			$qrUri = "masari:$address?tx_payment_id=$payment_id";
@@ -389,6 +389,14 @@ class Masari_Gateway extends WC_Payment_Gateway
 				$this->verify_payment($payment_id, $amount_msr2, $order);
 			}
 		}
+		
+		$displayedCurrentConfirmation = null;
+		if($this->mempool_tx_found)
+			$displayedCurrentConfirmation = 0;
+		if($this->confirmations > 0)
+			$displayedCurrentConfirmation = $this->confirmations;
+		
+		$displayedMaxConfirmation = $this->confirmations_wait;
 		
 		$transactionConfirmed = $this->confirmed;
 		$pluginIdentifier = 'masari_gateway';
@@ -528,14 +536,14 @@ class Masari_Gateway extends WC_Payment_Gateway
          */
         
         $pool_txs = $this->masari_daemon->get_transfers_in_mempool();
-        $mempool_tx_found = false;
+        $this->mempool_tx_found = false;
         $i = 1;
         $correct_tx;
         while($i <= count($pool_txs))
         {
            if($pool_txs[$i-1]["payment_id"] == $payment_id)
            {
-               $mempool_tx_found = true;
+               $this->mempool_tx_found = true;
                $tx_index = $i - 1;
            }
            $i++;
