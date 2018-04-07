@@ -39,6 +39,8 @@ class Masari_Gateway extends WC_Payment_Gateway
 	private $zero_confirm;
 	/** @var string  */
 	private $darkTheme;
+	/** @var bool  */
+	private $mempool_tx_found = false;
 	
 	
 
@@ -358,8 +360,6 @@ class Masari_Gateway extends WC_Payment_Gateway
 		$displayedPaymentAddress = null;
 		$displayedPaymentId = null;
 		$displayedDarkTheme = $this->darkTheme === 'yes';
-		$displayedCurrentConfirmation = $this->confirmations;
-		$displayedMaxConfirmation = $this->confirmations_wait;
 	
 		if($amount_msr2 !== null){
 			$qrUri = "masari:$address?tx_payment_id=$payment_id";
@@ -389,6 +389,14 @@ class Masari_Gateway extends WC_Payment_Gateway
 				$this->verify_payment($payment_id, $amount_msr2, $order);
 			}
 		}
+		
+		$displayedCurrentConfirmation = null;
+		if($this->mempool_tx_found)
+			$displayedCurrentConfirmation = 0;
+		if($this->confirmations > 0)
+			$displayedCurrentConfirmation = $this->confirmations;
+		
+		$displayedMaxConfirmation = $this->confirmations_wait;
 		
 		$transactionConfirmed = $this->confirmed;
 		$pluginIdentifier = 'masari_gateway';
@@ -528,14 +536,14 @@ class Masari_Gateway extends WC_Payment_Gateway
          */
         
         $pool_txs = $this->masari_daemon->get_transfers_in_mempool();
-        $mempool_tx_found = false;
+        $this->mempool_tx_found = false;
         $i = 1;
         $correct_tx;
         while($i <= count($pool_txs))
         {
            if($pool_txs[$i-1]["payment_id"] == $payment_id)
            {
-               $mempool_tx_found = true;
+               $this->mempool_tx_found = true;
                $tx_index = $i - 1;
            }
            $i++;
@@ -553,32 +561,23 @@ class Masari_Gateway extends WC_Payment_Gateway
         
         $get_payments_method = $this->masari_daemon->get_payments($payment_id);
         if (isset($get_payments_method["payments"][0]["amount"])) {
-            if ($get_payments_method["payments"][0]["amount"] >= $amount_atomic_units)
-            {
-                $this->on_verified($payment_id, $amount_atomic_units, $order_id);
-            }
-            if ($get_payments_method["payments"][0]["amount"] < $amount_atomic_units)
-            {
-                $totalPayed = $get_payments_method["payments"][0]["amount"];
-                $outputs_count = count($get_payments_method["payments"]); // number of outputs recieved with this payment id
-                $output_counter = 1;
+			$totalPayed = $get_payments_method["payments"][0]["amount"];
+			$outputs_count = count($get_payments_method["payments"]); // number of outputs recieved with this payment id
+			$output_counter = 1;
 
-                while($output_counter < $outputs_count)
-                {
-                         $totalPayed += $get_payments_method["payments"][$output_counter]["amount"];
-                         $output_counter++;
-                }
-                if($totalPayed >= $amount_atomic_units)
-                {
-                    $tx_height = $get_payments_method["payments"][0]["block_height"];
-                    $bc_height = $this->msr_tools->get_last_block_height();
-                    $this->confirmations = ($bc_height - $tx_height) + 1;
-                    if($this->confirmations >= $this->confirmations_wait)
-                    {
-                       $this->on_verified($payment_id, $amount_atomic_units, $order_id);
-                    }
-                }
-            }
+			while($output_counter < $outputs_count){
+				$totalPayed += $get_payments_method["payments"][$output_counter]["amount"];
+				$output_counter++;
+			}
+			if($totalPayed >= $amount_atomic_units){
+				$tx_height = $get_payments_method["payments"][$outputs_count-1]["block_height"];
+				$bc_height = $this->msr_tools->get_last_block_height();
+				$this->confirmations = ($bc_height - $tx_height) + 1;
+				if($this->confirmations >= $this->confirmations_wait)
+				{
+				   $this->on_verified($payment_id, $amount_atomic_units, $order_id);
+				}
+			}
         }
     }
     public function last_block_seen($height) // sometimes 2 blocks are mined within a few seconds of eacher. Make sure we don't miss one
