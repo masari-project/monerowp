@@ -100,3 +100,13 @@ function masari_plugin_activate() {
 	Masari_Gateway::install();
 }
 register_activation_hook( __FILE__, 'masari_plugin_activate' );
+
+
+function masariGateway_ajaxReload(){
+	$gateway = new Masari_Gateway();
+	$gateway->handlePaymentAjax();
+	exit;
+}
+
+add_action( 'wp_ajax_masari_gateway_ajax_reload', 'masariGateway_ajaxReload' );
+add_action( 'wp_ajax_nopriv_masari_gateway_ajax_reload', 'masariGateway_ajaxReload' );
