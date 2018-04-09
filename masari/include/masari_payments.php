@@ -9,7 +9,7 @@
 
 class Masari_Gateway extends WC_Payment_Gateway
 {
-    private $reloadTime = 17000;
+    private $reloadTime = 10000;
     private $discount;
     private $confirmed = false;
     private $masari_daemon;
@@ -338,7 +338,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         return false;
     }
     
-    public function instruction($order_id)
+    public function instruction($order_id, $ajax=false)
     {
     	$pluginDirectory = plugin_dir_url(__FILE__).'../';
 		$order = wc_get_order($order_id);
@@ -396,12 +396,33 @@ class Masari_Gateway extends WC_Payment_Gateway
 		if($this->confirmations > 0)
 			$displayedCurrentConfirmation = $this->confirmations;
 		
-		$displayedMaxConfirmation = $this->confirmations_wait;
-		
+		$displayedMaxConfirmation = (int)$this->confirmations_wait;
+	
 		$transactionConfirmed = $this->confirmed;
 		$pluginIdentifier = 'masari_gateway';
-		include 'html/paymentBox.php';
+		if(!$ajax){
+			$ajaxurl = admin_url('admin-ajax.php');
+			include 'html/paymentBox.php';
+		}else{
+			header('Content-Type: application/json');
+			echo json_encode(array(
+				'confirmed'=>$transactionConfirmed,
+				'currentConfirmations'=>$displayedCurrentConfirmation,
+				'maxConfirmation'=>$displayedMaxConfirmation,
+				'paymentAddress'=>$displayedPaymentAddress,
+				'paymentId'=>$displayedPaymentId,
+				'amount'=>$amount_msr2
+			));
+		}
     }
+    
+    public function handlePaymentAjax(){
+    	if(isset($_POST['order_id'])){
+    		$this->instruction(htmlentities($_POST['order_id']), true);
+		}else{
+    		echo json_encode(array('error'=>'missing_order_id'));
+		}
+	}
 
     private function set_paymentid_cookie($size)
     {
