@@ -18,7 +18,7 @@
 	function update() {
 		jQuery(document).ready(function () {
 			jQuery.post(
-				ajaxurl,
+				ajaxurl+'?_d='+Date.now(),
 				{
 					'action': 'masari_gateway_ajax_reload',
 					'order_id': window.orderId

@@ -428,7 +428,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         if (!isset($_COOKIE['payment_id'])) {
             $payment_id = bin2hex(openssl_random_pseudo_bytes($size));
-            setcookie('payment_id', $payment_id, time() + 2700);
+			setcookie('payment_id', $payment_id, time() + 2700, COOKIEPATH, COOKIE_DOMAIN );
         }
         else{
             $payment_id = $this->sanatize_id($_COOKIE['payment_id']);
@@ -545,7 +545,8 @@ class Masari_Gateway extends WC_Payment_Gateway
         
         global $wpdb;
 		$wpdb->query("UPDATE ".$wpdb->prefix."masari_gateway_payments_rate SET payed=true WHERE payment_id='".$payment_id."'");
-                         
+	
+		setcookie('payment_id', null, -1, COOKIEPATH, COOKIE_DOMAIN );
         $this->reloadTime = 3000000000000; // Greatly increase the reload time as it is no longer needed
     }
     
@@ -605,13 +606,13 @@ class Masari_Gateway extends WC_Payment_Gateway
     {
         if (!isset($_COOKIE['last_seen_block']))
         {
-            setcookie('last_seen_block', $height, time() + 2700);
+            setcookie('last_seen_block', $height, time() + 2700, COOKIEPATH, COOKIE_DOMAIN);
             return 0;
         }
         else{
             $cookie_block = $_COOKIE['last_seen_block'];
             $difference = $height - $cookie_block;
-            setcookie('last_seen_block', $height, time() + 2700);
+            setcookie('last_seen_block', $height, time() + 2700, COOKIEPATH, COOKIE_DOMAIN);
             return $difference;
         }
     }
