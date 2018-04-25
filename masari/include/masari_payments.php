@@ -520,15 +520,53 @@ class Masari_Gateway extends WC_Payment_Gateway
 		}
 		
 		$btcPerFiat = $fiatPrice/10000;
-    	
-        $msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/BTC');
-        $price = json_decode($msr_price, TRUE);
-        if (!isset($price)) {
-            $this->log->add('masari_gateway', '[ERROR] Unable to get the market price of Masari');
-            return null;
-        }
-        return round($price["Last"]/$btcPerFiat, 8);
+		
+		$totalVolume = 0;
+		
+		list($southxchangePrice,$southxchangeVolume) = $this->getPriceGromSouthxchange();
+		list($tradeOgrePrice,$tradeogreVolume) = $this->getPriceFromTradeOgre();
+  
+		if($southxchangePrice !== null){
+			$totalVolume += $southxchangeVolume;
+		}
+		if($tradeOgrePrice !== null){
+			$totalVolume += $tradeogreVolume;
+		}
+		
+		if($totalVolume > 0){
+			$msrSatoshiPrice = 0;
+			if($southxchangePrice !== null)	$msrSatoshiPrice  += $southxchangePrice*($southxchangeVolume/$totalVolume);
+			if($tradeOgrePrice !== null)	$msrSatoshiPrice  += $tradeOgrePrice*($tradeogreVolume/$totalVolume);
+			
+			return round($msrSatoshiPrice/$btcPerFiat, 8);
+		}else
+			return null;
     }
+    
+    private function getPriceGromSouthxchange(){
+		$msr_price = file_get_contents('https://www.southxchange.com/api/price/MSR/BTC');
+		$price = json_decode($msr_price, TRUE);
+		if($price !== null){
+			return array($price["Last"],$price["Volume24Hr"]);
+		}
+		return array(null,null);
+	}
+    
+    private function getPriceFromTradeOgre(){
+		$rawMakerts = file_get_contents('https://tradeogre.com/api/v1/markets');
+		$markets = json_decode($rawMakerts, TRUE);
+		if($markets !== null){
+			foreach($markets as $market){
+				$marketSymbol = array_keys($market)[0];
+				if($marketSymbol === 'BTC-MSR'){
+					$pricePerMsr = (float)$market[$marketSymbol]['price'];
+					$volumeInBtc = (float)$market[$marketSymbol]['volume'];
+					return array($pricePerMsr,$volumeInBtc/$pricePerMsr);
+				}
+			}
+		}
+		return array(null,null);
+	}
     
     private function on_verified($payment_id, $amount_atomic_units, $order_id)
     {
