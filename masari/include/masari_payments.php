@@ -343,12 +343,7 @@ class Masari_Gateway extends WC_Payment_Gateway
     	$pluginDirectory = plugin_dir_url(__FILE__).'../';
 		$order = wc_get_order($order_id);
 		$amount = floatval(preg_replace('#[^\d.]#', '', $order->get_total()));
-	        if($this->non_rpc){
-		   $payment_id = $this->set_paymentid_cookie(32);
-		}
-	    	else{
-		   $payment_id = $this->set_paymentid_cookie(8);
-		}
+		$payment_id = $this->get_paymentid_cookie($order_id);
 		$currency = $order->get_currency();
 		$amount_msr2 = $this->changeto( $amount, $currency, $payment_id, $order_id);
 		$address = $this->address;
@@ -424,16 +419,16 @@ class Masari_Gateway extends WC_Payment_Gateway
 		}
 	}
 
-    private function set_paymentid_cookie($size)
-    {
-        if (!isset($_COOKIE['payment_id'])) {
-            $payment_id = bin2hex(openssl_random_pseudo_bytes($size));
-			setcookie('payment_id', $payment_id, time() + 2700, COOKIEPATH, COOKIE_DOMAIN );
-        }
-        else{
-            $payment_id = $this->sanatize_id($_COOKIE['payment_id']);
-        }
-        return $payment_id;
+    private function get_paymentid_cookie($order_id){
+		global $wpdb;
+		$stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE order_id='".$order_id."'");
+    	if(count($stored_rate) > 0){
+			return $stored_rate[0]->payment_id;
+		}else{
+			$size = $this->non_rpc ? 32 : 8;
+			$payment_id = bin2hex(openssl_random_pseudo_bytes($size));
+			return $payment_id;
+		}
     }
 	
     public function sanatize_id($payment_id)
@@ -446,11 +441,11 @@ class Masari_Gateway extends WC_Payment_Gateway
     public function changeto($amount, $fiatCurrency, $payment_id, $order_id)
     {
         global $wpdb;
-        $rows_num = $wpdb->get_results("SELECT count(*) as count FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
+        $rows_num = $wpdb->get_results("SELECT count(*) as count FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE order_id='".$order_id."'");
         
         if ($rows_num[0]->count > 0) // Checks if the row has already been created or not
         {
-            $stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE payment_id='".$payment_id."'");
+            $stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE order_id='".$order_id."'");
 			$rate = $stored_rate[0]->rate / 10000; //this will turn the stored rate back into a decimaled number
         } else // If the row has not been created then the live exchange rate will be grabbed and stored
         {
