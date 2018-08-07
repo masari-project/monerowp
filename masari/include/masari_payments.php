@@ -421,7 +421,7 @@ class Masari_Gateway extends WC_Payment_Gateway
 
     private function get_paymentid_cookie($order_id){
 		global $wpdb;
-		$stored_rate = $wpdb->get_results("SELECT rate FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE order_id='".$order_id."'");
+		$stored_rate = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix."masari_gateway_payments_rate WHERE order_id='".$order_id."'");
     	if(count($stored_rate) > 0){
 			return $stored_rate[0]->payment_id;
 		}else{
