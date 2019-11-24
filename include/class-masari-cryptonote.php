@@ -11,15 +11,15 @@ if(!class_exists('SHA3'))
 if(!class_exists('ed25519'))
     require_once('crypto/ed25519.php');
 
-require_once('class-monero-base58.php');
+require_once('class-masari-base58.php');
 
-class Monero_Cryptonote
+class Masari_Cryptonote
 {
     protected $ed25519;
     public function __construct()
     {
         $this->ed25519 = new ed25519();
-        $this->base58 = new Monero_base58();
+        $this->base58 = new Masari_base58();
         $this->address_prefix = MONERO_GATEWAY_ADDRESS_PREFIX;
         $this->address_prefix_integrated = MONERO_GATEWAY_ADDRESS_PREFIX_INTEGRATED;
     }
@@ -222,12 +222,12 @@ class Monero_Cryptonote
     }
 
     /*
-     * Create a valid base58 encoded Monero address from public keys
+     * Create a valid base58 encoded Masari address from public keys
      *
      * @param string Public spend key
      * @param string Public view key
      *
-     * @return string Base58 encoded Monero address
+     * @return string Base58 encoded Masari address
      */
     public function encode_address($pSpendKey, $pViewKey)
     {
@@ -246,9 +246,9 @@ class Monero_Cryptonote
     }
 
 /*
- * Decode a base58 encoded Monero address
+ * Decode a base58 encoded Masari address
  *
- * @param string A base58 encoded Monero address
+ * @param string A base58 encoded Masari address
  *
  * @return array An array containing the Address network byte, public spend key, and public view key
  */
@@ -291,11 +291,11 @@ class Monero_Cryptonote
     }
 
     /*
-     * Generate a Monero address from seed
+     * Generate a Masari address from seed
      *
      * @param string Hex string to use as seed
      *
-     * @return string A base58 encoded Monero address
+     * @return string A base58 encoded Masari address
      */
     public function address_from_seed($hex_seed)
     {

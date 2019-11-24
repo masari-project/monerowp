@@ -1,23 +1,23 @@
 <table class="striped" style="width:100%" cellspacing="0" cellpadding="5">
     <tr>
         <td>Exchange rate</td>
-        <td>1 XMR = <?php echo $details['rate_formatted'].' '.$details['currency']; ?></td>
+        <td>1 MSR = <?php echo $details['rate_formatted'].' '.$details['currency']; ?></td>
     </tr>
     <tr>
         <td>Total amount</td>
-        <td><?php echo $details['amount_total_formatted']; ?> XMR</td>
+        <td><?php echo $details['amount_total_formatted']; ?> MSR</td>
     </tr>
     <tr>
         <td>Total paid</td>
-        <td><?php echo $details['amount_paid_formatted']; ?> XMR</td>
+        <td><?php echo $details['amount_paid_formatted']; ?> MSR</td>
     </tr>
     <tr>
         <td>Total due</td>
-        <td><?php echo $details['amount_due_formatted']; ?> XMR</td>
+        <td><?php echo $details['amount_due_formatted']; ?> MSR</td>
     </tr>
     <tr>
         <td>Order age</td>
-        <td><?php echo Monero_Gateway::format_seconds_to_time($details['order_age']) ?> ago</td>
+        <td><?php echo Masari_Gateway::format_seconds_to_time($details['order_age']) ?> ago</td>
     </tr>
     <tr>
         <td>Order exipires</td>
@@ -72,10 +72,10 @@
     <?php foreach($details['txs'] as $tx): ?>
     <tr>
         <td>
-            <a href="<?php echo MONERO_GATEWAY_EXPLORER_URL.'/tx/'.$tx['txid']; ?>" target="_blank"><?php echo $tx['txid']; ?></a>
+            <a href="<?php echo MASARI_GATEWAY_EXPLORER_URL.'/tx/'.$tx['txid']; ?>" target="_blank"><?php echo $tx['txid']; ?></a>
         </td>
         <td><?php echo $tx['height']; ?></td>
-        <td><?php echo sprintf(MONERO_GATEWAY_ATOMIC_UNITS_SPRINTF, $tx['amount'] / MONERO_GATEWAY_ATOMIC_UNITS_POW); ?> XMR</td>
+        <td><?php echo sprintf(MASARI_GATEWAY_ATOMIC_UNITS_SPRINTF, $tx['amount'] / MASARI_GATEWAY_ATOMIC_UNITS_POW); ?> MSR</td>
     </tr>
     <?php endforeach; ?>
 </table>

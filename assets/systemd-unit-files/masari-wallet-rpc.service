@@ -1,0 +1,14 @@
+[Unit]
+Description=Masari Wallet RPC
+After=network.target masarid.service
+
+[Service]
+User=masariservices
+Group=masariservices
+WorkingDirectory=/opt/masari-wallets
+Type=simple
+ExecStart=/opt/masari-bin/masari-wallet-rpc --wallet-file /opt/masari-wallets/woocommerce --rpc-bind-port 38084 --password-file /opt/masari-wallets/woocommerce.password --disable-rpc-login --log-file /var/log/masari-wallet.log
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

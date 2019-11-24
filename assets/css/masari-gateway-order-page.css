@@ -1,0 +1,104 @@
+#masari_payment_messages > span {
+    display:none;
+}
+.masari_details_row {
+    display: flex !important;
+    align-items: center;
+    margin:0 -8px;
+}
+.masari_details_row > * {
+    padding:0 8px;
+}
+.masari_details_main {
+    flex-grow: 1;
+    word-break:break-all;
+}
+.masari_details_right.button-row {
+    display:flex;
+    margin-top: 5px;
+    align-self: self-start;
+}
+.masari_details_right.button-row button {
+    width: 32px;
+    height: 32px;
+    padding: 6px 2px;
+    margin: 0 4px;
+    line-height:28px;
+    text-align:center;
+}
+#masari_integrated_address {
+    line-height: 16px;
+}
+#masari_toast {
+    position: fixed;
+    z-index: 999;
+    top: 32px;
+    right: 12px;
+}
+#masari_toast > div {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 20px;
+    width: 300px;
+    border-radius: 3px;
+    color: white;
+    right: -400px;
+}
+#masari_toast > div.success {
+    background: rgba(68, 190, 117, 0.8);
+}
+#masari_toast > div.error {
+    background: rgba(195, 60, 60, 0.8);
+}
+.woocommerce-order-details {
+    background: #f1f1f1;
+border-radius: 5px;
+padding: 15px;
+}
+.masari_payment_send_info .data-box {
+    border: 1px solid #d0d0d0;
+    background: white;
+    margin-bottom: 15px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+.masari_payment_send_info .data-box label {
+    border-right: 1px solid #d0d0d0;
+    width: 100px;
+    padding-left: 5px;
+    font-size: 16px;
+    display: inline-block;
+    height: 34px;
+    background: white;
+    vertical-align: top;
+    line-height: 34px;
+    box-sizing: border-box;
+    color: black;
+}
+.masari_payment_send_info .data-box input {
+    border-style:solid;
+    border:none;
+    width: calc(100% - 150px);
+    padding:0;
+    -webkit-appearance: none;
+}
+.masari_payment_send_info .data-box .copy {
+    border-left:1px solid #d0d0d0;
+	width: 40px;
+	text-align: center;
+	margin: 0;
+    padding: 0;
+}
+.masari_payment_send_info .qr-code{
+    text-align: center;
+    width: 200px;
+    margin: 0 auto;
+}
+.masari_payment_send_info .qr-code img{
+	display: inline-block;
+}
+

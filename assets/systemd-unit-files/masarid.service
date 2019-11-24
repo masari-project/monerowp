@@ -1,0 +1,14 @@
+[Unit]
+Description=Masari Full Node
+After=network.target
+
+[Service]
+User=masariservices
+Group=masariservices
+WorkingDirectory=/opt/masari-data-dir
+Type=simple
+LimitNOFILE=65535
+ExecStart=/usr/bin/masarid --log-file /var/log/masarid.log --data-dir /opt/masari-data-dir --non-interactive
+Restart=always
+[Install]
+WantedBy=multi-user.target
