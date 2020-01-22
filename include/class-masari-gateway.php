@@ -246,7 +246,7 @@ class Masari_Gateway extends WC_Payment_Gateway
         $wpdb->query($query);
 
         $order->update_status('on-hold', __('Awaiting offline payment', 'masari_gateway'));
-        $order->reduce_order_stock(); // Reduce stock levels
+        wc_reduce_stock_levels($order_id); // Reduce stock levels
         WC()->cart->empty_cart(); // Remove cart
 
         return array(
