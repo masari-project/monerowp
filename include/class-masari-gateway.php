@@ -552,7 +552,7 @@ class Masari_Gateway extends WC_Payment_Gateway
             }
 
             $amount_formatted = self::format_masari($amount_due);
-            $qrcode_uri = 'masari:'.$address.'?tx_amount='.$amount_formatted.'&tx_payment_id='.$payment_id;
+            $qrcode_uri = 'masari:'.$payment_id.'?tx_amount='.$amount_formatted;
             $my_order_url = wc_get_endpoint_url('view-order', $order_id, wc_get_page_permalink('myaccount'));
 
             $payment_details = array(
