@@ -82,9 +82,10 @@ padding: 15px;
 .masari_payment_send_info .data-box input {
     border-style:solid;
     border:none;
-    width: calc(100% - 150px);
+    width: calc(100% - 152px);
     padding:0;
     -webkit-appearance: none;
+    display:inline-block;
 }
 .masari_payment_send_info .data-box .copy {
     border-left:1px solid #d0d0d0;
@@ -92,6 +93,8 @@ padding: 15px;
 	text-align: center;
 	margin: 0;
     padding: 0;
+    display: inline-block;
+    background-color: #fff;
 }
 .masari_payment_send_info .qr-code{
     text-align: center;
@@ -101,4 +104,3 @@ padding: 15px;
 .masari_payment_send_info .qr-code img{
 	display: inline-block;
 }
-
