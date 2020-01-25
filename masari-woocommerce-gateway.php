@@ -3,8 +3,9 @@
 Plugin Name: Masari Woocommerce Gateway
 Plugin URI: https://github.com/masari-project/masariwp
 Description: Extends WooCommerce by adding a Masari Gateway
-Version: 3.0.1
-Tested up to: 4.9.8
+Version: 3.0.2
+WC requires at least: 3.0.0
+WC tested up to: 3.8.1
 Author: mosu-forge, SerHack
 Author URI: https://monerointegrations.com/
 */
